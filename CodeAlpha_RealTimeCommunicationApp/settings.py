@@ -31,7 +31,7 @@ DATABASES = {
 }
 
 # Security settings
-ALLOWED_HOSTS = ['https://talkbits-6167c4d2b0ba.herokuapp.com/', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['talkbits-6167c4d2b0ba.herokuapp.com', 'localhost', '127.0.0.1']
 DEBUG = True  # Set to False for production
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
