@@ -1,0 +1,1 @@
+web: CodeAlpha_RealTimeCommunicationApp.wsgi
