@@ -1,1 +1,1 @@
-web: CodeAlpha_RealTimeCommunicationApp.wsgi
+web: gunicorn CodeAlpha_RealTimeCommunicationApp.wsgi

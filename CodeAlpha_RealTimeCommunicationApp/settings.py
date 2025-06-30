@@ -24,14 +24,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-c=-dy)+c^en+!u!tru8qn!uwo@kvst*4u0))5(j*#f=#$5!sgy'
 
-# SECURITY WARNING: don't run with debug turned on in production
+# SECURITY WARNING: don't run with debug turned on in productiong
 
 DATABASES = {
     'default': dj_database_url.config(default='sqlite:///db.sqlite3', conn_max_age=600)
 }
 
 # Security settings
-ALLOWED_HOSTS = ['your-app-name.herokuapp.com', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['https://talkbits-6167c4d2b0ba.herokuapp.com/', 'localhost', '127.0.0.1']
 DEBUG = False  # Set to False for production
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
@@ -51,6 +51,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
