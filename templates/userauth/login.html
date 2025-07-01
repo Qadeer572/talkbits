@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - CommHub</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #6f42c1;
+            --secondary-color: #20c997;
+            --dark-bg: #1a1d29;
+            --card-bg: #252836;
+            --accent-color: #ff6b6b;
+            --input-bg: #2d3748;
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--dark-bg) 0%, #2d1b69 100%);
+            color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            padding: 2rem 0;
+        }
+
+        .background-animation {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .floating-shapes {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            opacity: 0.1;
+            animation: float 15s infinite ease-in-out;
+        }
+
+        .floating-shapes:nth-child(1) {
+            top: 10%;
+            left: 10%;
+            animation-delay: 0s;
+            transform: scale(0.8);
+        }
+
+        .floating-shapes:nth-child(2) {
+            top: 70%;
+            right: 10%;
+            animation-delay: -5s;
+            transform: scale(1.2);
+        }
+
+        .floating-shapes:nth-child(3) {
+            bottom: 10%;
+            left: 60%;
+            animation-delay: -10s;
+            transform: scale(0.6);
+        }
+
+        @keyframes float {
+            0%, 100% { 
+                transform: translateY(0px) rotate(0deg) scale(var(--scale, 1));
+            }
+            33% { 
+                transform: translateY(-30px) rotate(120deg) scale(var(--scale, 1));
+            }
+            66% { 
+                transform: translateY(30px) rotate(240deg) scale(var(--scale, 1));
+            }
+        }
+
+        .login-card {
+            background: rgba(37, 40, 54, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-color);
+            border-radius: 25px;
+            padding: 3rem;
+            width: 100%;
+            max-width: 450px;
+            position: relative;
+            z-index: 2;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.8s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .login-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color), var(--accent-color));
+            border-radius: 25px 25px 0 0;
+        }
+
+        .brand-logo {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .brand-logo h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { filter: drop-shadow(0 0 10px rgba(32, 201, 151, 0.3)); }
+            to { filter: drop-shadow(0 0 20px rgba(32, 201, 151, 0.5)); }
+        }
+
+        .brand-logo p {
+            color: #a0aec0;
+            font-size: 1rem;
+        }
+
+        .form-floating {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-control {
+            background: var(--input-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 15px;
+            color: white;
+            padding: 1rem;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            height: auto;
+        }
+
+        .form-control:focus {
+            background: var(--input-bg);
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(111, 66, 193, 0.25);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .form-control::placeholder {
+            color: #718096;
+        }
+
+        .form-floating > label {
+            color: #a0aec0;
+            padding-left: 1rem;
+        }
+
+        .form-floating > .form-control:focus ~ label,
+        .form-floating > .form-control:not(:placeholder-shown) ~ label {
+            color: var(--secondary-color);
+            transform: scale(0.85) translateY(-0.5rem) translateX(0.15rem);
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #a0aec0;
+            cursor: pointer;
+            z-index: 10;
+            transition: color 0.3s ease;
+        }
+
+        .password-toggle:hover {
+            color: var(--secondary-color);
+        }
+
+        .btn-login {
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            border: none;
+            border-radius: 15px;
+            padding: 1rem;
+            font-weight: 600;
+            font-size: 1.1rem;
+            width: 100%;
+            margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-login::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(111, 66, 193, 0.4);
+        }
+
+        .btn-login:hover::before {
+            left: 100%;
+        }
+
+        .btn-login:active {
+            transform: translateY(-1px);
+        }
+
+        .divider {
+            position: relative;
+            text-align: center;
+            margin: 2rem 0;
+            color: #a0aec0;
+        }
+
+        .divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: var(--border-color);
+        }
+
+        .divider span {
+            background: var(--card-bg);
+            padding: 0 1rem;
+        }
+
+        .social-login {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .btn-social {
+            flex: 1;
+            padding: 0.75rem;
+            border: 2px solid var(--border-color);
+            border-radius: 15px;
+            background: transparent;
+            color: white;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-social:hover {
+            border-color: var(--primary-color);
+            background: rgba(111, 66, 193, 0.1);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .forgot-password {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .forgot-password a {
+            color: var(--secondary-color);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.3s ease;
+        }
+
+        .forgot-password a:hover {
+            color: #fff;
+            text-decoration: underline;
+        }
+
+        .signup-link {
+            text-align: center;
+            color: #a0aec0;
+            font-size: 0.9rem;
+        }
+
+        .signup-link a {
+            color: var(--secondary-color);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        .signup-link a:hover {
+            color: #fff;
+        }
+
+        .remember-me {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-check-input {
+            background: var(--input-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+            margin-right: 0.5rem;
+        }
+
+        .form-check-input:checked {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .form-check-label {
+            color: #a0aec0;
+            font-size: 0.9rem;
+        }
+
+        .loading-spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid transparent;
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 0.5rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            background: rgba(255, 107, 107, 0.1);
+            border: 1px solid var(--accent-color);
+            border-radius: 10px;
+            padding: 0.75rem;
+            margin-bottom: 1rem;
+            color: var(--accent-color);
+            font-size: 0.9rem;
+            display: none;
+            animation: shake 0.5s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        @media (max-width: 576px) {
+            .login-card {
+                margin: 1rem;
+                padding: 2rem;
+            }
+            
+            .brand-logo h1 {
+                font-size: 2rem;
+            }
+            
+            .social-login {
+                flex-direction: column;
+            }
+        }
+
+        /* Custom animations for form elements */
+        .form-floating {
+            animation: fadeInUp 0.6s ease-out;
+            animation-fill-mode: both;
+        }
+
+        .form-floating:nth-child(2) { animation-delay: 0.1s; }
+        .form-floating:nth-child(3) { animation-delay: 0.2s; }
+        .form-floating:nth-child(4) { animation-delay: 0.3s; }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <!-- Background Animation -->
+        <div class="background-animation">
+            <div class="floating-shapes" style="--scale: 0.8;"></div>
+            <div class="floating-shapes" style="--scale: 1.2;"></div>
+            <div class="floating-shapes" style="--scale: 0.6;"></div>
+        </div>
+
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-md-6 col-lg-5">
+                    <div class="login-card">
+                        <!-- Brand Logo -->
+                        <div class="brand-logo">
+                            <h1><i class="fas fa-comments"></i> CommHub</h1>
+                            <p>Welcome back! Please sign in to your account.</p>
+                        </div>
+
+                        <!-- Error Message -->
+                        <div class="error-message" id="errorMessage">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <span id="errorText">Invalid credentials. Please try again.</span>
+                        </div>
+
+                        <!-- Login Form -->
+                        <form id="loginForm" novalidate>
+                            <div class="form-floating">
+                                <input type="email" class="form-control" id="email" placeholder="name@example.com" required>
+                                <label for="email"><i class="fas fa-envelope me-2"></i>Email Address</label>
+                            </div>
+
+                            <div class="form-floating position-relative">
+                                <input type="password" class="form-control" id="password" placeholder="Password" required>
+                                <label for="password"><i class="fas fa-lock me-2"></i>Password</label>
+                                <button type="button" class="password-toggle" onclick="togglePassword()">
+                                    <i class="fas fa-eye" id="passwordIcon"></i>
+                                </button>
+                            </div>
+
+                            <div class="remember-me">
+                                <input class="form-check-input" type="checkbox" id="rememberMe">
+                                <label class="form-check-label" for="rememberMe">
+                                    Remember me for 30 days
+                                </label>
+                            </div>
+
+                            <button type="submit" class="btn btn-login">
+                                <div class="loading-spinner" id="loadingSpinner"></div>
+                                <span id="loginButtonText">
+                                    <i class="fas fa-sign-in-alt me-2"></i>Sign In
+                                </span>
+                            </button>
+                        </form>
+
+                        <!-- Forgot Password -->
+                        <div class="forgot-password">
+                            <a href="#" onclick="forgotPassword()">
+                                <i class="fas fa-key me-1"></i>Forgot your password?
+                            </a>
+                        </div>
+
+                        <!-- Divider -->
+                        <div class="divider">
+                            <span>or continue with</span>
+                        </div>
+
+                        <!-- Social Login -->
+                        <div class="social-login">
+                            <a href="#" class="btn-social" onclick="socialLogin('google')">
+                                <i class="fab fa-google"></i>
+                                <span class="d-none d-sm-inline">Google</span>
+                            </a>
+                            <a href="#" class="btn-social" onclick="socialLogin('microsoft')">
+                                <i class="fab fa-microsoft"></i>
+                                <span class="d-none d-sm-inline">Microsoft</span>
+                            </a>
+                            <a href="#" class="btn-social" onclick="socialLogin('github')">
+                                <i class="fab fa-github"></i>
+                                <span class="d-none d-sm-inline">GitHub</span>
+                            </a>
+                        </div>
+
+                        <!-- Signup Link -->
+                        <div class="signup-link">
+                            Don't have an account? 
+                            <a href="/userauth/signup/">Create one now</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Password toggle functionality
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const passwordIcon = document.getElementById('passwordIcon');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                passwordIcon.className = 'fas fa-eye-slash';
+            } else {
+                passwordInput.type = 'password';
+                passwordIcon.className = 'fas fa-eye';
+            }
+        }
+
+        // Form validation and submission
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const errorMessage = document.getElementById('errorMessage');
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            const loginButtonText = document.getElementById('loginButtonText');
+            
+            // Hide any previous error messages
+            errorMessage.style.display = 'none';
+            
+            // Basic validation
+            if (!email || !password) {
+                showError('Please fill in all fields.');
+                return;
+            }
+            
+            if (!isValidEmail(email)) {
+                showError('Please enter a valid email address.');
+                return;
+            }
+            
+            // Show loading state
+            loadingSpinner.style.display = 'inline-block';
+            loginButtonText.innerHTML = '<span>Signing In...</span>';
+            
+            // Simulate login process
+            setTimeout(() => {
+                // Hide loading state
+                loadingSpinner.style.display = 'none';
+                loginButtonText.innerHTML = '<i class="fas fa-sign-in-alt me-2"></i>Sign In';
+                
+                // Simulate successful login
+                if (email === 'demo@commhub.com' && password === 'demo123') {
+                    // Success animation
+                    loginButtonText.innerHTML = '<i class="fas fa-check me-2"></i>Welcome Back!';
+                    setTimeout(() => {
+                        alert('🎉 Login successful! Redirecting to dashboard...');
+                        // In real app, redirect to dashboard
+                        // window.location.href = '/dashboard';
+                    }, 1000);
+                } else {
+                    showError('Invalid email or password. Try demo@commhub.com / demo123');
+                }
+            }, 2000);
+        });
+
+        function showError(message) {
+            const errorMessage = document.getElementById('errorMessage');
+            const errorText = document.getElementById('errorText');
+            
+            errorText.textContent = message;
+            errorMessage.style.display = 'block';
+            
+            // Auto-hide error after 5 seconds
+            setTimeout(() => {
+                errorMessage.style.display = 'none';
+            }, 5000);
+        }
+
+        function isValidEmail(email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        }
+
+        // Social login functions
+        function socialLogin(provider) {
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            loadingSpinner.style.display = 'inline-block';
+            
+            setTimeout(() => {
+                loadingSpinner.style.display = 'none';
+                alert(`🔐 ${provider.charAt(0).toUpperCase() + provider.slice(1)} login would be processed here!`);
+            }, 1500);
+        }
+
+        function forgotPassword() {
+            const email = document.getElementById('email').value;
+            if (email) {
+                alert(`📧 Password reset link would be sent to ${email}`);
+            } else {
+                alert('📧 Please enter your email address first, then click "Forgot Password"');
+            }
+        }
+
+        function goToSignup() {
+            alert('📝 Redirecting to signup page...');
+            // In real app: window.location.href = '/signup';
+        }
+
+        // Auto-focus first input on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('email').focus();
+            
+            // Add some demo hints
+            setTimeout(() => {
+                const emailInput = document.getElementById('email');
+                if (!emailInput.value) {
+                    emailInput.placeholder = 'Try: demo@commhub.com';
+                }
+            }, 3000);
+        });
+
+        // Enhanced form interactions
+        const inputs = document.querySelectorAll('.form-control');
+        inputs.forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement.style.transform = 'scale(1.02)';
+            });
+            
+            input.addEventListener('blur', function() {
+                this.parentElement.style.transform = 'scale(1)';
+            });
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Alt + L to focus on login form
+            if (e.altKey && e.key === 'l') {
+                e.preventDefault();
+                document.getElementById('email').focus();
+            }
+        });
+
+        // Demo credentials hint
+        setTimeout(() => {
+            console.log('💡 Demo credentials: demo@commhub.com / demo123');
+        }, 2000);
+    </script>
+</body>
+</html>
