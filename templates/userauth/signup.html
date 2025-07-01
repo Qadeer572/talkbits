@@ -271,7 +271,7 @@
         .password-toggle {
             position: absolute;
             right: 15px;
-            top: 50%;
+            top:50%;
             transform: translateY(-50%);
             background: none;
             border: none;
@@ -734,31 +734,12 @@
                             </button>
                         </div>
 
-                        <!-- Divider (only show on step 1) -->
-                        <div class="divider" id="socialDivider">
-                            <span>or sign up with</span>
-                        </div>
-
-                        <!-- Social Signup (only show on step 1) -->
-                        <div class="social-signup" id="socialSignup">
-                            <a href="#" class="btn-social" onclick="socialSignup('google')">
-                                <i class="fab fa-google"></i>
-                                <span class="d-none d-sm-inline">Google</span>
-                            </a>
-                            <a href="#" class="btn-social" onclick="socialSignup('microsoft')">
-                                <i class="fab fa-microsoft"></i>
-                                <span class="d-none d-sm-inline">Microsoft</span>
-                            </a>
-                            <a href="#" class="btn-social" onclick="socialSignup('github')">
-                                <i class="fab fa-github"></i>
-                                <span class="d-none d-sm-inline">GitHub</span>
-                            </a>
-                        </div>
+                         
 
                         <!-- Login Link -->
                         <div class="login-link">
                             Already have an account? 
-                            <a href="/userauth/login"">Sign in here</a>
+                            <a href="#" onclick="goToLogin()">Sign in here</a>
                         </div>
                     </div>
                 </div>
@@ -844,6 +825,9 @@
                 
                 isValid = validateField(password, password.value.length >= 8) && isValid;
                 isValid = validateField(confirmPassword, password.value === confirmPassword.value) && isValid;
+            } else if (step === 3) {
+                const termsAccepted = document.getElementById('termsAccepted');
+                isValid = validateField(termsAccepted, termsAccepted.checked) && isValid;
             }
             
             return isValid;
@@ -881,16 +865,109 @@
         }
 
         // Password strength checker
-        function checkPasswordStrength(password) {
+        document.getElementById('password').addEventListener('input', function() {
+            const password = this.value;
             const strengthFill = document.getElementById('strengthFill');
             const strengthText = document.getElementById('strengthText');
             
             let strength = 0;
-            let text = '';
-            let className = '';
             
             if (password.length >= 8) strength++;
             if (/[a-z]/.test(password)) strength++;
             if (/[A-Z]/.test(password)) strength++;
             if (/[0-9]/.test(password)) strength++;
             if (/[^A-Za-z0-9]/.test(password)) strength++;
+            
+            strengthFill.className = 'strength-fill';
+            if (strength <= 2) {
+                strengthFill.classList.add('strength-weak');
+                strengthText.textContent = 'Weak password';
+                strengthText.style.color = 'var(--accent-color)';
+            } else if (strength <= 4) {
+                strengthFill.classList.add('strength-medium');
+                strengthText.textContent = 'Medium password';
+                strengthText.style.color = 'var(--warning-color)';
+            } else {
+                strengthFill.classList.add('strength-strong');
+                strengthText.textContent = 'Strong password';
+                strengthText.style.color = 'var(--success-color)';
+            }
+        });
+
+        // Form submission
+        document.getElementById('signupForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            if (validateStep(3)) {
+                const submitButtonText = document.getElementById('submitButtonText');
+                const loadingSpinner = document.getElementById('loadingSpinner');
+                
+                // Show loading state
+                submitButtonText.textContent = 'Creating Account...';
+                loadingSpinner.style.display = 'inline-block';
+                
+                // Simulate API call
+                setTimeout(() => {
+                    // Hide form and show success message
+                    document.getElementById('signupForm').style.display = 'none';
+                    document.getElementById('successMessage').style.display = 'block';
+                    document.getElementById('socialDivider').style.display = 'none';
+                    document.getElementById('socialSignup').style.display = 'none';
+                    document.getElementById('progressBarContainer').style.display = 'none';
+                    document.getElementById('login-link').style.display = 'none';
+                    
+                    // Reset form
+                    document.getElementById('signupForm').reset();
+                    document.getElementById('strengthFill').className = 'strength-fill';
+                    document.getElementById('strengthText').textContent = 'Enter a password to see strength';
+                    document.getElementById('strengthText').style.color = '';
+                    currentStep = 1;
+                    updateProgressBar();
+                    updateSocialVisibility();
+                    
+                    // Reset form steps
+                    document.querySelectorAll('.form-step').forEach(step => step.classList.remove('active'));
+                    document.getElementById('step1').classList.add('active');
+                    document.querySelectorAll('.step-indicator').forEach(indicator => {
+                        indicator.classList.remove('active', 'completed');
+                    });
+                    document.getElementById('step1Indicator').classList.add('active');
+                    
+                    // Reset validation states
+                    document.querySelectorAll('.form-control').forEach(field => {
+                        field.classList.remove('is-valid', 'is-invalid');
+                    });
+                    document.getElementById('termsAccepted').classList.remove('is-valid', 'is-invalid');
+                    
+                    // Reset button state
+                    submitButtonText.textContent = 'Create Account';
+                    loadingSpinner.style.display = 'none';
+                }, 1500);
+            }
+        });
+
+        // Social signup placeholder
+        function socialSignup(provider) {
+            alert(`Sign up with ${provider} is not implemented yet. Please use the form to create an account.`);
+            // In a real implementation, this would redirect to the provider's OAuth flow
+            // Example: window.location.href = `/auth/${provider}`;
+        }
+
+        // Navigation functions
+        function goToLogin() {
+            alert('Redirecting to login page...');
+            // In a real implementation: window.location.href = '/login';
+        }
+
+        function showTerms() {
+            alert('Terms of Service page would be displayed here.');
+            // In a real implementation: window.location.href = '/terms';
+        }
+
+        function showPrivacy() {
+            alert('Privacy Policy page would be displayed here.');
+            // In a real implementation: window.location.href = '/privacy';
+        }
+    </script>
+</body>
+</html>
