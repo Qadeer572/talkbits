@@ -546,7 +546,7 @@
         loginButtonText.innerHTML = '<span>Signing In...</span>';
 
         try {
-            const res = await fetch('http://127.0.0.1:8000/userauth/login-api/', {
+            const res = await fetch('https://talkbits-6167c4d2b0ba.herokuapp.com/userauth/login-api/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

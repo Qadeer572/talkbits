@@ -48,7 +48,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'userauth',
     'chatApp',
-    'channels',
+    #'channels',
     'rest_framework',
     'rest_framework.authtoken'
 ]
