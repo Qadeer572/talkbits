@@ -1,132 +1,4 @@
-let currentChat = null;
-        let isRecording = false;
-        
-        // Chat descriptions data
-        const chatDescriptions = {
-            'John Doe': {
-                type: 'contact',
-                description: 'Software Developer at TechCorp. Always available for tech discussions and project collaborations. Known for quick responses and helpful solutions.',
-                status: 'Online',
-                lastSeen: 'Active now'
-            },
-            'Sarah Smith': {
-                type: 'contact', 
-                description: 'Marketing Manager and creative strategist. Expert in digital marketing campaigns and brand development. Loves sharing innovative ideas.',
-                status: 'Away',
-                lastSeen: '2 hours ago'
-            },
-            'Mike Johnson': {
-                type: 'contact',
-                description: 'UI/UX Designer with 5+ years experience. Passionate about creating user-friendly interfaces and improving user experiences.',
-                status: 'Online',
-                lastSeen: 'Active now'
-            },
-            'Project Team': {
-                type: 'group',
-                description: 'Main project development team. Daily standups at 9 AM, sprint planning every Monday. Share updates, blockers, and collaborate on current sprint tasks.',
-                members: 5,
-                created: 'Created 3 months ago'
-            },
-            'Family': {
-                type: 'group', 
-                description: 'Family group for sharing daily updates, photos, and planning family events. Keep everyone connected and informed about family news.',
-                members: 8,
-                created: 'Created 1 year ago'
-            },
-            'Study Group': {
-                type: 'group',
-                description: 'Computer Science study group for sharing resources, discussing assignments, and preparing for exams. Active study sessions and peer support.',
-                members: 12,
-                created: 'Created 6 months ago'
-            }
-        };
-        
-        function toggleProfileDropdown() {
-            const dropdown = document.getElementById('profileDropdown');
-            const isVisible = dropdown.classList.contains('show');
-            
-            if (isVisible) {
-                dropdown.classList.remove('show');
-            } else {
-                dropdown.classList.add('show');
-            }
-        }
-        
-        function openSettings() {
-            const dropdown = document.getElementById('profileDropdown');
-            dropdown.classList.remove('show');
-            alert('Settings panel would open here with options for:\n• Notifications\n• Privacy Settings\n• Theme Options\n• Account Settings\n• Help & Support');
-        }
-        
-        function openProfile() {
-            const dropdown = document.getElementById('profileDropdown');
-            dropdown.classList.remove('show');
-            alert('Profile editing panel would open here to update:\n• Display Name\n• Profile Picture\n• Status Message\n• Contact Information\n• Privacy Settings');
-        }
-        
-        function logout() {
-            const dropdown = document.getElementById('profileDropdown');
-            dropdown.classList.remove('show');
-            if (confirm('Are you sure you want to logout?\n\nYou will be redirected to the login page.')) {
-                alert('Logging out...\n\nRedirecting to login page in 3 seconds.');
-                // Simulate logout delay
-                setTimeout(() => {
-                    alert('You have been successfully logged out!');
-                }, 3000);
-            }
-        }
-        
-        // Close profile dropdown when clicking outside
-        document.addEventListener('click', function(event) {
-            const profileSection = document.querySelector('.profile-section');
-            const dropdown = document.getElementById('profileDropdown');
-            
-            if (profileSection && !profileSection.contains(event.target)) {
-                dropdown.classList.remove('show');
-            }
-        });
-        
-        // Prevent dropdown from closing when clicking inside it
-        document.addEventListener('DOMContentLoaded', function() {
-            const dropdown = document.getElementById('profileDropdown');
-            if (dropdown) {
-                dropdown.addEventListener('click', function(event) {
-                    event.stopPropagation();
-                });
-            }
-        });
-        
-        function createChatDescription(chatInfo) {
-            if (chatInfo.type === 'contact') {
-                return `
-                    <div class="chat-description">
-                        <div class="d-flex align-items-center mb-2">
-                            <i class="fas fa-info-circle description-icon"></i>
-                            <strong>Contact Information</strong>
-                        </div>
-                        <p class="mb-2">${chatInfo.description}</p>
-                        <div class="d-flex justify-content-between">
-                            <small><i class="fas fa-circle text-success me-1"></i>Status: ${chatInfo.status}</small>
-                            <small><i class="fas fa-clock me-1"></i>${chatInfo.lastSeen}</small>
-                        </div>
-                    </div>
-                `;
-            } else {
-                return `
-                    <div class="chat-description">
-                        <div class="d-flex align-items-center mb-2">
-                            <i class="fas fa-users description-icon"></i>
-                            <strong>Group Information</strong>
-                        </div>
-                        <p class="mb-2">${chatInfo.description}</p>
-                        <div class="d-flex justify-content-between">
-                            <small><i class="fas fa-user-friends me-1"></i>${chatInfo.members} members</small>
-                            <small><i class="fas fa-calendar me-1"></i>${chatInfo.created}</small>
-                        </div>
-                    </div>
-                `;
-            }
-        }<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -824,27 +696,60 @@ let currentChat = null;
         }
         
         function sendMessage() {
-            const input = document.getElementById('messageInput');
-            const message = input.value.trim();
+            // connect the socke.io
+            const socket = io('http://127.0.0.1:8000');
+            let currentRoom = 'general';
+            let currentUsername = 'Anonymous';
+            let typingTimer;
+            let isConnected = false;
+
+            // Connection status
+            socket.on('connect', function() {
+                console.log('Connected to Socket.IO server');
+                isConnected = true;
+                showStatus('Connected to chat server!', 'success');
+                joinRoom();
+            });
             
-            if (message) {
-                addMessageToChat(message, 'sent', getCurrentTime());
-                input.value = '';
+            socket.on('disconnect', function() {
+                console.log('Disconnected from server');
+                isConnected = false;
+                showStatus('Disconnected from chat server. Trying to reconnect...', 'error');
+            });
+            
+            socket.on('connect_error', function(error) {
+                console.error('Connection error:', error);
+                showStatus('Failed to connect to chat server. Make sure the Socket.IO server is running on port 8000.', 'error');
+            });
+
+            socket.on('new_message', function(data) {
+                const messages = document.getElementById('messageInput');
+                const messageElement = document.createElement('div');
+                messageElement.className = 'message';
                 
-                // Simulate response after a short delay
-                setTimeout(() => {
-                    const responses = [
-                        'That sounds great!',
-                        'I agree with you.',
-                        'Let me think about it.',
-                        'Sure, no problem!',
-                        'Thanks for letting me know.'
-                    ];
-                    const randomResponse = responses[Math.floor(Math.random() * responses.length)];
-                    addMessageToChat(randomResponse, 'received', getCurrentTime());
-                }, 1000 + Math.random() * 2000);
-            }
-        }
+                const timestamp = new Date().toLocaleTimeString();
+                messageElement.innerHTML = `
+                    <strong>${escapeHtml(data.username)}:</strong> 
+                    ${escapeHtml(data.message)}
+                    <small style="float: right; color: #999;">${timestamp}</small>
+                `;
+                
+                messages.appendChild(messageElement);
+                messages.scrollTop = messages.scrollHeight;
+            });
+            
+            socket.on('status', function(data) {
+            showStatus(data.message, 'info');
+            });
+        
+            socket.on('user_typing', function(data) {
+                const typingDiv = document.getElementById('typingIndicator');
+                if (data.typing) {
+                    typingDiv.innerHTML = `<span class="typing">${escapeHtml(data.username)} is typing...</span>`;
+                } else {
+                    typingDiv.innerHTML = '';
+                }
+            });
         
         function addMessageToChat(content, type, time) {
             const messagesArea = document.getElementById('messagesArea');
@@ -952,6 +857,7 @@ let currentChat = null;
                 }
             });
         });
+    }
     </script>
 </body>
 </html>

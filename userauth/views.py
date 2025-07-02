@@ -21,12 +21,13 @@ class UserListView(APIView):
         return Response(serializer.data)
 
 class login(APIView):
-    def post(self,requst):
-        serializer= loginSerilaizer(data=requst.data)
+    def post(self,request):
+        serializer= loginSerilaizer(data=request.data)
+         
         if not serializer.is_valid():
             return Response({
-                'status': 'error',
-                'message': serializer.errors
+                'status': False,
+                'message': serializer.errors 
             }, status=400)
         
         username=serializer.validated_data['username']
@@ -36,12 +37,12 @@ class login(APIView):
 
         if not user_obj:
             return Response({
-                'status': 'error',
+                'status': False,
                 'message': 'Invalid credentials'
             }, status=401)
         token, _ = Token.objects.get_or_create(user=user_obj)
         return Response({
-            'status': 'success',
+            'status': True,
             'message': 'Login successful',
             'data' : {'token': str(token)}
         })
@@ -50,10 +51,10 @@ class signup(APIView):
 
     def post(self,request):
         serializer=signupSerializers(data=request.data)
-
+        print(request.data)
         if not serializer.is_valid():
             return Response({
-                'status': 'error',
+                'status': False,
                 'message': serializer.errors
             }, status=400)
         
@@ -71,7 +72,7 @@ class signup(APIView):
         user_obj.set_password(password)
         user_obj.save()
         return Response({
-            'status': 'success',
+            'status': True,
             'message': 'User created successfully'
         }, status=201)
     

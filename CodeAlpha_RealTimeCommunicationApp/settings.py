@@ -48,9 +48,13 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'userauth',
     'chatApp',
+    'channels',
     'rest_framework',
     'rest_framework.authtoken'
 ]
+
+# Define ASGI application
+ASGI_APPLICATION = 'CodeAlpha_RealTimeCommunicationApp.asgi.application'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -62,6 +66,16 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+# Channels Redis settings
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            'hosts': [('127.0.0.1', 6379)],
+        },
+    },
+}
 
 ROOT_URLCONF = 'CodeAlpha_RealTimeCommunicationApp.urls'
 

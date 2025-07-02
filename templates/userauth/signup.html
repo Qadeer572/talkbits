@@ -736,10 +736,11 @@
 
                          
 
+                        
                         <!-- Login Link -->
                         <div class="login-link">
                             Already have an account? 
-                            <a href="#" onclick="goToLogin()">Sign in here</a>
+                            <a href="/userauth/login/">Sign in here</a>
                         </div>
                     </div>
                 </div>
@@ -895,68 +896,92 @@
         });
 
         // Form submission
-        document.getElementById('signupForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            if (validateStep(3)) {
-                const submitButtonText = document.getElementById('submitButtonText');
-                const loadingSpinner = document.getElementById('loadingSpinner');
-                
-                // Show loading state
-                submitButtonText.textContent = 'Creating Account...';
-                loadingSpinner.style.display = 'inline-block';
-                
-                // Simulate API call
-                setTimeout(() => {
-                    // Hide form and show success message
-                    document.getElementById('signupForm').style.display = 'none';
-                    document.getElementById('successMessage').style.display = 'block';
-                    document.getElementById('socialDivider').style.display = 'none';
-                    document.getElementById('socialSignup').style.display = 'none';
-                    document.getElementById('progressBarContainer').style.display = 'none';
-                    document.getElementById('login-link').style.display = 'none';
-                    
-                    // Reset form
-                    document.getElementById('signupForm').reset();
-                    document.getElementById('strengthFill').className = 'strength-fill';
-                    document.getElementById('strengthText').textContent = 'Enter a password to see strength';
-                    document.getElementById('strengthText').style.color = '';
-                    currentStep = 1;
-                    updateProgressBar();
-                    updateSocialVisibility();
-                    
-                    // Reset form steps
-                    document.querySelectorAll('.form-step').forEach(step => step.classList.remove('active'));
-                    document.getElementById('step1').classList.add('active');
-                    document.querySelectorAll('.step-indicator').forEach(indicator => {
-                        indicator.classList.remove('active', 'completed');
-                    });
-                    document.getElementById('step1Indicator').classList.add('active');
-                    
-                    // Reset validation states
-                    document.querySelectorAll('.form-control').forEach(field => {
-                        field.classList.remove('is-valid', 'is-invalid');
-                    });
-                    document.getElementById('termsAccepted').classList.remove('is-valid', 'is-invalid');
-                    
-                    // Reset button state
-                    submitButtonText.textContent = 'Create Account';
-                    loadingSpinner.style.display = 'none';
-                }, 1500);
-            }
-        });
+        document.getElementById('signupForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
 
-        // Social signup placeholder
-        function socialSignup(provider) {
-            alert(`Sign up with ${provider} is not implemented yet. Please use the form to create an account.`);
-            // In a real implementation, this would redirect to the provider's OAuth flow
-            // Example: window.location.href = `/auth/${provider}`;
+    if (validateStep(3)) {
+        const submitButtonText = document.getElementById('submitButtonText');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+
+        // Show loading state
+        submitButtonText.textContent = 'Creating Account...';
+        loadingSpinner.style.display = 'inline-block';
+
+        // Collect form data
+        const firstName = document.getElementById('firstName').value; 
+        const lastName = document.getElementById('lastName').value;
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+
+        try {
+            const res = await fetch('http://127.0.0.1:8000/userauth/signup-api/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    firstName : firstName,
+                    lastName :lastName,
+                    email: email,
+                    password: password
+                }),
+            });
+
+            const data = await res.json();
+
+            if (data.status) {
+                // Hide form and show success message
+                document.getElementById('signupForm').style.display = 'none';
+                document.getElementById('successMessage').style.display = 'block';
+                document.getElementById('socialDivider').style.display = 'none';
+                document.getElementById('socialSignup').style.display = 'none';
+                document.getElementById('progressBarContainer').style.display = 'none';
+                document.getElementById('login-link').style.display = 'none';
+
+                // Reset form
+                document.getElementById('signupForm').reset();
+                document.getElementById('strengthFill').className = 'strength-fill';
+                document.getElementById('strengthText').textContent = 'Enter a password to see strength';
+                document.getElementById('strengthText').style.color = '';
+                currentStep = 1;
+                updateProgressBar();
+                updateSocialVisibility();
+
+                // Reset form steps
+                document.querySelectorAll('.form-step').forEach(step => step.classList.remove('active'));
+                document.getElementById('step1').classList.add('active');
+                document.querySelectorAll('.step-indicator').forEach(indicator => {
+                    indicator.classList.remove('active', 'completed');
+                });
+                document.getElementById('step1Indicator').classList.add('active');
+
+                // Reset validation states
+                document.querySelectorAll('.form-control').forEach(field => {
+                    field.classList.remove('is-valid', 'is-invalid');
+                });
+                document.getElementById('termsAccepted').classList.remove('is-valid', 'is-invalid');
+            } else {
+                // Show error message from backend
+                let message = data.detail || data.message || 'Account creation failed.';
+                alert(message); // or show error on page
+            }
+
+        } catch (error) {
+            console.error('Signup error:', error);
         }
+
+        // Reset button state
+        submitButtonText.textContent = 'Create Account';
+        loadingSpinner.style.display = 'none';
+    }
+});
+
+         
 
         // Navigation functions
         function goToLogin() {
-            alert('Redirecting to login page...');
-            // In a real implementation: window.location.href = '/login';
+            //alert('Redirecting to login page...');
+             window.location.href = '/userauth/login/';
         }
 
         function showTerms() {

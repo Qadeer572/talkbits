@@ -518,54 +518,69 @@
         }
 
         // Form validation and submission
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const errorMessage = document.getElementById('errorMessage');
-            const loadingSpinner = document.getElementById('loadingSpinner');
-            const loginButtonText = document.getElementById('loginButtonText');
-            
-            // Hide any previous error messages
-            errorMessage.style.display = 'none';
-            
-            // Basic validation
-            if (!email || !password) {
-                showError('Please fill in all fields.');
-                return;
-            }
-            
-            if (!isValidEmail(email)) {
-                showError('Please enter a valid email address.');
-                return;
-            }
-            
-            // Show loading state
-            loadingSpinner.style.display = 'inline-block';
-            loginButtonText.innerHTML = '<span>Signing In...</span>';
-            
-            // Simulate login process
-            setTimeout(() => {
-                // Hide loading state
-                loadingSpinner.style.display = 'none';
-                loginButtonText.innerHTML = '<i class="fas fa-sign-in-alt me-2"></i>Sign In';
-                
-                // Simulate successful login
-                if (email === 'demo@commhub.com' && password === 'demo123') {
-                    // Success animation
-                    loginButtonText.innerHTML = '<i class="fas fa-check me-2"></i>Welcome Back!';
-                    setTimeout(() => {
-                        alert('🎉 Login successful! Redirecting to dashboard...');
-                        // In real app, redirect to dashboard
-                        // window.location.href = '/dashboard';
-                    }, 1000);
-                } else {
-                    showError('Invalid email or password. Try demo@commhub.com / demo123');
-                }
-            }, 2000);
-        });
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
 
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const errorMessage = document.getElementById('errorMessage');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const loginButtonText = document.getElementById('loginButtonText');
+
+        // Hide any previous error messages
+        errorMessage.style.display = 'none';
+
+        // Basic validation
+        if (!email || !password) {
+            showError('Please fill in all fields.');
+            return;
+        }
+
+        if (!isValidEmail(email)) {
+            showError('Please enter a valid email address.');
+            return;
+        }
+
+        // Show loading state
+        loadingSpinner.style.display = 'inline-block';
+        loginButtonText.innerHTML = '<span>Signing In...</span>';
+
+        try {
+            const res = await fetch('http://127.0.0.1:8000/userauth/login-api/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    username: email,
+                    password: password
+                }),
+            });
+
+            const data = await res.json();
+
+            // Hide loading state
+            loadingSpinner.style.display = 'none';
+            loginButtonText.innerHTML = '<i class="fas fa-sign-in-alt me-2"></i>Sign In';
+
+            
+            if (data.status) {
+                // Success animation
+                loginButtonText.innerHTML = '<i class="fas fa-check me-2"></i>Welcome Back!';
+                setTimeout(() => {
+                    window.location.href = '/chat/';
+                }, 1000);
+            } else {
+                showError('Invalid email or password. Try demo@commhub.com / demo123');
+            }
+
+        } catch (error) {
+            loadingSpinner.style.display = 'none';
+            loginButtonText.innerHTML = '<i class="fas fa-sign-in-alt me-2"></i>Sign In';
+            showError('An error occurred while logging in. Please try again later.');
+            console.error(error);
+        }
+    });
         function showError(message) {
             const errorMessage = document.getElementById('errorMessage');
             const errorText = document.getElementById('errorText');
@@ -584,17 +599,7 @@
             return emailRegex.test(email);
         }
 
-        // Social login functions
-        function socialLogin(provider) {
-            const loadingSpinner = document.getElementById('loadingSpinner');
-            loadingSpinner.style.display = 'inline-block';
-            
-            setTimeout(() => {
-                loadingSpinner.style.display = 'none';
-                alert(`🔐 ${provider.charAt(0).toUpperCase() + provider.slice(1)} login would be processed here!`);
-            }, 1500);
-        }
-
+        
         function forgotPassword() {
             const email = document.getElementById('email').value;
             if (email) {
