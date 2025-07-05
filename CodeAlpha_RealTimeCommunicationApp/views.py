@@ -5,5 +5,5 @@ def index(request):
     return render(request, 'index.html')
 
 
-def home(request):
+def home2(request):
     return render(request,'index.html')
