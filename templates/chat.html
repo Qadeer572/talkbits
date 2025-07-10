@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ room_name }}</title>
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  </head>
+  <body>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        height: 100vh;
+        overflow: hidden;
+      }
+
+      .main-container {
+        height: 100vh;
+        backdrop-filter: blur(10px);
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        margin: 10px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+      }
+
+      .sidebar {
+        background: linear-gradient(145deg, #1e3c72 0%, #2a5298 100%);
+        height: 100%;
+        position: relative;
+        overflow: hidden;
+        border-radius: 20px 0 0 20px;
+      }
+
+      .sidebar::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(45deg, rgba(255, 255, 255, 0.1) 0%, transparent 100%);
+        pointer-events: none;
+      }
+
+      .sidebar-header {
+        padding: 30px 25px;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .sidebar-header h5 {
+        color: #ffffff;
+        font-weight: 600;
+        font-size: 1.2rem;
+        margin: 0;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      }
+
+      .contacts {
+        padding: 10px 0;
+        height: calc(100vh - 250px);
+        overflow-y: auto;
+      }
+
+      .contacts::-webkit-scrollbar {
+        width: 4px;
+      }
+
+      .contacts::-webkit-scrollbar-track {
+        background: transparent;
+      }
+
+      .contacts::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 2px;
+      }
+
+      .contact-item {
+        display: block;
+        padding: 20px 25px;
+        color: #ffffff;
+        text-decoration: none;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .contact-item::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+        transition: left 0.5s;
+      }
+
+      .contact-item:hover::before {
+        left: 100%;
+      }
+
+      .contact-item:hover {
+        background: rgba(255, 255, 255, 0.15);
+        color: #ffffff;
+        text-decoration: none;
+        transform: translateX(5px);
+      }
+
+      .contact-item.active {
+        background: rgba(255, 255, 255, 0.2);
+        border-left: 4px solid #ffffff;
+      }
+
+      .profile-avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        transition: all 0.3s ease;
+      }
+
+      .contact-item:hover .profile-avatar {
+        border-color: #ffffff;
+        transform: scale(1.05);
+      }
+
+      .contact-info {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .contact-name {
+        font-weight: 600;
+        font-size: 1.1rem;
+        margin-bottom: 5px;
+        color: #ffffff;
+      }
+
+      .last-message {
+        font-size: 0.9rem;
+        color: rgba(255, 255, 255, 0.7);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .timestamp {
+        font-size: 0.8rem;
+        color: rgba(255, 255, 255, 0.6);
+        min-width: 45px;
+        text-align: right;
+      }
+
+      .user-profile {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: 25px;
+        background: rgba(0, 0, 0, 0.2);
+        backdrop-filter: blur(10px);
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .user-info {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        color: #ffffff;
+      }
+
+      .user-name {
+        font-weight: 600;
+        font-size: 1.1rem;
+      }
+
+      .logout-btn {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: #ffffff;
+        padding: 8px 16px;
+        border-radius: 20px;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        font-size: 0.9rem;
+      }
+
+      .logout-btn:hover {
+        background: rgba(255, 255, 255, 0.2);
+        color: #ffffff;
+        text-decoration: none;
+        transform: translateY(-2px);
+      }
+
+      .chat-area {
+        background: linear-gradient(145deg, #f8fafc 0%, #e2e8f0 100%);
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        border-radius: 0 20px 20px 0;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .chat-header {
+        padding: 25px 30px;
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .chat-user-info {
+        display: flex;
+        align-items: center;
+      }
+
+      .chat-avatar {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-right: 15px;
+        border: 3px solid #667eea;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+      }
+
+      .chat-username {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #2d3748;
+        margin: 0;
+      }
+
+      .search-form {
+        display: flex;
+        align-items: center;
+      }
+
+      .search-input {
+        border: 2px solid rgba(102, 126, 234, 0.2);
+        border-radius: 25px;
+        padding: 12px 20px;
+        width: 300px;
+        outline: none;
+        transition: all 0.3s ease;
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(10px);
+      }
+
+      .search-input:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        background: rgba(255, 255, 255, 1);
+      }
+
+      .chatbox {
+        flex: 1;
+        padding: 20px 30px;
+        overflow-y: auto;
+        background: transparent;
+        position: relative;
+      }
+
+      .chatbox::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="%23000" opacity="0.02"/><circle cx="75" cy="75" r="1" fill="%23000" opacity="0.02"/><circle cx="25" cy="75" r="1" fill="%23000" opacity="0.02"/><circle cx="75" cy="25" r="1" fill="%23000" opacity="0.02"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+        pointer-events: none;
+      }
+
+      .chatbox::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      .chatbox::-webkit-scrollbar-track {
+        background: transparent;
+      }
+
+      .chatbox::-webkit-scrollbar-thumb {
+        background: rgba(102, 126, 234, 0.3);
+        border-radius: 3px;
+      }
+
+      .chat-message {
+        display: flex;
+        margin-bottom: 20px;
+        animation: slideIn 0.3s ease-out;
+      }
+
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .chat-message.sender {
+        justify-content: flex-end;
+      }
+
+      .chat-message.receiver {
+        justify-content: flex-start;
+      }
+
+      .message-bubble {
+        max-width: 70%;
+        padding: 16px 20px;
+        border-radius: 20px;
+        position: relative;
+        word-wrap: break-word;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        backdrop-filter: blur(10px);
+      }
+
+      .chat-message.sender .message-bubble {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: #ffffff;
+        border-bottom-right-radius: 5px;
+      }
+
+      .chat-message.receiver .message-bubble {
+        background: rgba(255, 255, 255, 0.9);
+        color: #2d3748;
+        border-bottom-left-radius: 5px;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+      }
+
+      .message-input-area {
+        padding: 25px 30px;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-top: 1px solid rgba(0, 0, 0, 0.1);
+      }
+
+      .message-input-container {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        background: rgba(255, 255, 255, 0.9);
+        padding: 8px;
+        border-radius: 25px;
+        border: 2px solid rgba(102, 126, 234, 0.2);
+        transition: all 0.3s ease;
+      }
+
+      .message-input-container:focus-within {
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      }
+
+      .message-input {
+        flex: 1;
+        border: none;
+        outline: none;
+        padding: 12px 20px;
+        font-size: 1rem;
+        background: transparent;
+        color: #2d3748;
+      }
+
+      .message-input::placeholder {
+        color: #a0aec0;
+      }
+
+      .send-button {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        color: #ffffff;
+        padding: 12px 20px;
+        border-radius: 20px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 600;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+      }
+
+      .send-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+      }
+
+      .send-button:active {
+        transform: translateY(0);
+      }
+
+      .no-messages {
+        text-align: center;
+        color: #a0aec0;
+        font-size: 1.1rem;
+        margin-top: 50px;
+        font-weight: 500;
+      }
+
+      .online-indicator {
+        width: 12px;
+        height: 12px;
+        background: #48bb78;
+        border-radius: 50%;
+        position: absolute;
+        bottom: 2px;
+        right: 2px;
+        border: 2px solid #ffffff;
+        animation: pulse 2s infinite;
+      }
+
+      @keyframes pulse {
+        0% {
+          box-shadow: 0 0 0 0 rgba(72, 187, 120, 0.7);
+        }
+        70% {
+          box-shadow: 0 0 0 10px rgba(72, 187, 120, 0);
+        }
+        100% {
+          box-shadow: 0 0 0 0 rgba(72, 187, 120, 0);
+        }
+      }
+
+      .message-time {
+        font-size: 0.8rem;
+        opacity: 0.7;
+        margin-top: 5px;
+      }
+
+      .typing-indicator {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        padding: 10px 20px;
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 20px;
+        margin-bottom: 10px;
+      }
+
+      .typing-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #a0aec0;
+        animation: typing 1.4s infinite ease-in-out;
+      }
+
+      .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+      .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+
+      @keyframes typing {
+        0%, 80%, 100% {
+          transform: scale(0);
+        }
+        40% {
+          transform: scale(1);
+        }
+      }
+
+      @media (max-width: 768px) {
+        .main-container {
+          margin: 0;
+          border-radius: 0;
+        }
+        
+        .sidebar {
+          border-radius: 0;
+        }
+        
+        .chat-area {
+          border-radius: 0;
+        }
+        
+        .search-input {
+          width: 200px;
+        }
+        
+        .message-bubble {
+          max-width: 85%;
+        }
+      }
+    </style>
+
+    <div class="main-container">
+      <div class="row h-100 no-gutters">
+        <!-- Sidebar -->
+        <div class="col-4 sidebar">
+          <div class="sidebar-header">
+            <h5><i class="fas fa-comments mr-2"></i>Conversations</h5>
+          </div>
+          
+          <div class="contacts">
+            {% for item in user_last_messages %}
+            <a href="{% url 'chat' item.user.username %}" 
+               class="contact-item {% if item.user.username == room_name %}active{% endif %}"
+               data-id="{{ room_name }}">
+              <div class="d-flex align-items-center">
+                <div class="position-relative">
+                  <img src="https://ui-avatars.com/api/?name={{ item.user.username|urlencode }}&size=64&background=random"
+                       alt="{{ item.user.username }}'s Profile"
+                       class="profile-avatar">
+                  <div class="online-indicator"></div>
+                </div>
+                
+                <div class="contact-info ml-3">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div class="contact-name">{{ item.user.username }}</div>
+                    {% if item.last_message %}
+                    <div class="timestamp">{{ item.last_message.timestamp|date:"H:i" }}</div>
+                    {% endif %}
+                  </div>
+                  <div class="last-message" id="last-message">
+                    {% if item.last_message %}
+                      {% if item.last_message.sender == request.user %}You: {% endif %}
+                      {{ item.last_message.content|truncatewords:5 }}
+                    {% else %}
+                      No messages yet
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+            </a>
+            {% endfor %}
+          </div>
+
+          <div class="user-profile">
+            <div class="user-info">
+              <div class="d-flex align-items-center">
+                <i class="fas fa-user-circle fa-2x mr-2"></i>
+                <div class="user-name">{{ request.user.username|title }}</div>
+              </div>
+              <a href="{% url 'logout' %}" class="logout-btn">
+                <i class="fas fa-sign-out-alt mr-1"></i>Logout
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Chat Area -->
+        <div class="col-8 chat-area" data-id="{{ room_name }}">
+          <div class="chat-header">
+            <div class="chat-user-info">
+              <img src="https://ui-avatars.com/api/?name={{ room_name|urlencode }}&size=64&background=random"
+                   alt="Profile" class="chat-avatar">
+              <h2 class="chat-username">{{ room_name }}</h2>
+            </div>
+            
+            <form method="GET" action="" class="search-form">
+              <input type="text" name="search" id="searchInput" class="search-input"
+                     placeholder="🔍 Search messages..." value="{{ search_query }}">
+            </form>
+          </div>
+
+          <div id="chatbox" class="chatbox">
+            {% if chats %}
+              {% for message in chats %}
+              <div class="chat-message {% if message.sender == request.user %}sender{% else %}receiver{% endif %}">
+                <div class="message-bubble">
+                  <div>{{ message.content }}</div>
+                  <div class="message-time">{{ message.timestamp|date:"H:i" }}</div>
+                </div>
+              </div>
+              {% endfor %}
+            {% else %}
+              <div class="no-messages">
+                <i class="fas fa-comments fa-3x mb-3 opacity-50"></i>
+                <p>No messages yet. Start the conversation!</p>
+              </div>
+            {% endif %}
+          </div>
+
+          <div class="message-input-area">
+            <div class="message-input-container">
+              <input type="text" id="my_input" class="message-input"
+                     placeholder="Type your message..." required>
+              <button id="submit_button" class="send-button">
+                <i class="fas fa-paper-plane mr-1"></i>Send
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {{slug|json_script:"room_slug"}}
+
+    <script>
+      const chatbox = document.querySelector("#chatbox");
+
+      function scrollToBottom() {
+        chatbox.scrollTop = chatbox.scrollHeight;
+      }
+
+      scrollToBottom();
+
+      const roomName = JSON.parse(
+        document.getElementById("room_slug").textContent
+      );
+      const chatSocket = new WebSocket(
+        "ws://" + window.location.host + "/ws/chat/{{ room_name }}/"
+      );
+
+      chatSocket.onopen = function (e) {
+        console.log("Connected successfully!");
+      };
+      
+      chatSocket.onclose = function (e) {
+        console.log("Connection closed!");
+      };
+
+      document.querySelector("#my_input").focus();
+      document.querySelector("#my_input").onkeyup = function (e) {
+        if (e.keyCode == 13) {
+          e.preventDefault();
+          document.querySelector("#submit_button").click();
+        }
+      };
+
+      document.querySelector("#submit_button").onclick = function (e) {
+        var messageInput = document.querySelector("#my_input").value.trim();
+
+        if (messageInput.length == 0) {
+          // Add a subtle shake animation for empty input
+          const inputContainer = document.querySelector(".message-input-container");
+          inputContainer.style.animation = "shake 0.5s ease-in-out";
+          setTimeout(() => {
+            inputContainer.style.animation = "";
+          }, 500);
+        } else {
+          chatSocket.send(
+            JSON.stringify({
+              message: messageInput,
+              username: "{{ request.user.username }}",
+              room_name: "{{ room_name }}",
+            })
+          );
+          document.querySelector("#my_input").value = "";
+        }
+      };
+
+      chatSocket.onmessage = function (e) {
+        const data = JSON.parse(e.data);
+
+        if (data.message && data.sender) {
+          const chatbox = document.querySelector("#chatbox");
+          const noMessages = document.querySelector(".no-messages");
+          if (noMessages) {
+            noMessages.style.display = "none";
+          }
+
+          const messageDiv = document.createElement("div");
+          messageDiv.className = "chat-message " + 
+            (data.sender === "{{ request.user.username }}" ? "sender" : "receiver");
+          
+          const currentTime = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+          
+          messageDiv.innerHTML = `
+            <div class="message-bubble">
+              <div>${data.message}</div>
+              <div class="message-time">${currentTime}</div>
+            </div>
+          `;
+          
+          chatbox.appendChild(messageDiv);
+          scrollToBottom();
+
+          // Update sidebar
+          const lastMessage = document.querySelector(".contact-item.active #last-message");
+          if (lastMessage) {
+            lastMessage.innerHTML = data.sender === "{{ request.user.username }}" 
+              ? "You: " + data.message 
+              : data.message;
+
+            const timestamp = document.querySelector(".contact-item.active .timestamp");
+            if (timestamp) {
+              timestamp.innerHTML = currentTime;
+            }
+          }
+        }
+      };
+
+      // Add shake animation
+      const style = document.createElement('style');
+      style.textContent = `
+        @keyframes shake {
+          0%, 100% { transform: translateX(0); }
+          10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+          20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+      `;
+      document.head.appendChild(style);
+    </script>
+  </body>
+</html>
