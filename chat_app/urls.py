@@ -16,10 +16,11 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path , include
+from signaling.views import call_page
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('users.urls')),
     path('', include('chat.urls')),
-
+    path('call/', call_page),
 ]

@@ -254,6 +254,28 @@
         margin: 0;
       }
 
+      .call-buttons {
+        display: flex;
+        gap: 10px;
+        margin-right: 20px;
+      }
+
+      .call-button {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        color: #ffffff;
+        padding: 8px 16px;
+        border-radius: 20px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 600;
+      }
+
+      .call-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+      }
+
       .search-form {
         display: flex;
         align-items: center;
@@ -393,7 +415,7 @@
         color: #a0aec0;
       }
 
-      .send-button {
+      .send-button, .record-button, .file-upload-btn {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         border: none;
         color: #ffffff;
@@ -405,13 +427,17 @@
         box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
       }
 
-      .send-button:hover {
+      .send-button:hover, .record-button:hover, .file-upload-btn:hover {
         transform: translateY(-2px);
         box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
       }
 
-      .send-button:active {
+      .send-button:active, .record-button:active, .file-upload-btn:active {
         transform: translateY(0);
+      }
+
+      .record-button.recording {
+        background: linear-gradient(135deg, #ff6b6b 0%, #ff8e53 100%);
       }
 
       .no-messages {
@@ -435,15 +461,9 @@
       }
 
       @keyframes pulse {
-        0% {
-          box-shadow: 0 0 0 0 rgba(72, 187, 120, 0.7);
-        }
-        70% {
-          box-shadow: 0 0 0 10px rgba(72, 187, 120, 0);
-        }
-        100% {
-          box-shadow: 0 0 0 0 rgba(72, 187, 120, 0);
-        }
+        0% { box-shadow: 0 0 0 0 rgba(72, 187, 120, 0.7); }
+        70% { box-shadow: 0 0 0 10px rgba(72, 187, 120, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(72, 187, 120, 0); }
       }
 
       .message-time {
@@ -474,12 +494,58 @@
       .typing-dot:nth-child(2) { animation-delay: -0.16s; }
 
       @keyframes typing {
-        0%, 80%, 100% {
-          transform: scale(0);
-        }
-        40% {
-          transform: scale(1);
-        }
+        0%, 80%, 100% { transform: scale(0); }
+        40% { transform: scale(1); }
+      }
+
+      .video-call-container {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .video-call-content {
+        width: 80%;
+        max-width: 1200px;
+        background: #fff;
+        border-radius: 10px;
+        padding: 20px;
+        position: relative;
+      }
+
+      .video-call-content video {
+        width: 100%;
+        max-height: 400px;
+        border-radius: 10px;
+        margin-bottom: 10px;
+      }
+
+      .call-controls {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+      }
+
+      .file-message {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px;
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 15px;
+      }
+
+      .audio-message {
+        padding: 10px;
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 15px;
       }
 
       @media (max-width: 768px) {
@@ -502,6 +568,10 @@
         
         .message-bubble {
           max-width: 85%;
+        }
+
+        .video-call-content {
+          width: 95%;
         }
       }
     </style>
@@ -570,6 +640,15 @@
               <h2 class="chat-username">{{ room_name }}</h2>
             </div>
             
+            <div class="call-buttons">
+              <button id="audioCallBtn" class="call-button">
+                <i class="fas fa-phone"></i> Audio Call
+              </button>
+              <button id="videoCallBtn" class="call-button">
+                <i class="fas fa-video"></i> Video Call
+              </button>
+            </div>
+            
             <form method="GET" action="" class="search-form">
               <input type="text" name="search" id="searchInput" class="search-input"
                      placeholder="🔍 Search messages..." value="{{ search_query }}">
@@ -598,6 +677,13 @@
             <div class="message-input-container">
               <input type="text" id="my_input" class="message-input"
                      placeholder="Type your message..." required>
+              <input type="file" id="fileInput" style="display: none;">
+              <button id="fileUploadBtn" class="file-upload-btn">
+                <i class="fas fa-paperclip"></i>
+              </button>
+              <button id="recordButton" class="record-button">
+                <i class="fas fa-microphone"></i>
+              </button>
               <button id="submit_button" class="send-button">
                 <i class="fas fa-paper-plane mr-1"></i>Send
               </button>
@@ -607,10 +693,35 @@
       </div>
     </div>
 
+    <!-- Video Call Modal -->
+    <div id="videoCallContainer" class="video-call-container">
+      <div class="video-call-content">
+        <video id="localVideo" autoplay muted></video>
+        <video id="remoteVideo" autoplay></video>
+        <div class="call-controls">
+          <button id="muteAudioBtn" class="call-button">
+            <i class="fas fa-microphone"></i> Mute
+          </button>
+          <button id="muteVideoBtn" class="call-button">
+            <i class="fas fa-video"></i> Video Off
+          </button>
+          <button id="endCallBtn" class="call-button">
+            <i class="fas fa-phone-slash"></i> End Call
+          </button>
+        </div>
+      </div>
+    </div>
+
     {{slug|json_script:"room_slug"}}
 
     <script>
       const chatbox = document.querySelector("#chatbox");
+      let localStream = null;
+      let peerConnection = null;
+      let mediaRecorder = null;
+      let recordedChunks = [];
+      let isAudioMuted = false;
+      let isVideoMuted = false;
 
       function scrollToBottom() {
         chatbox.scrollTop = chatbox.scrollHeight;
@@ -625,6 +736,12 @@
         "ws://" + window.location.host + "/ws/chat/{{ room_name }}/"
       );
 
+      const configuration = {
+        iceServers: [
+          { urls: 'stun:stun.l.google.com:19302' }
+        ]
+      };
+
       chatSocket.onopen = function (e) {
         console.log("Connected successfully!");
       };
@@ -633,6 +750,107 @@
         console.log("Connection closed!");
       };
 
+      chatSocket.onmessage = function (e) {
+        const data = JSON.parse(e.data);
+
+        if (data.message) {
+          handleTextMessage(data);
+        } else if (data.file) {
+          handleFileMessage(data);
+        } else if (data.audio) {
+          handleAudioMessage(data);
+        } else if (data.type === 'offer') {
+          handleOffer(data);
+        } else if (data.type === 'answer') {
+          handleAnswer(data);
+        } else if (data.type === 'candidate') {
+          handleCandidate(data);
+        } else if (data.type === 'call_ended') {
+          endCall();
+        }
+      };
+
+      function handleTextMessage(data) {
+        const noMessages = document.querySelector(".no-messages");
+        if (noMessages) {
+          noMessages.style.display = "none";
+        }
+
+        const messageDiv = document.createElement("div");
+        messageDiv.className = "chat-message " + 
+          (data.sender === "{{ request.user.username }}" ? "sender" : "receiver");
+        
+        const currentTime = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        
+        messageDiv.innerHTML = `
+          <div class="message-bubble">
+            <div>${data.message}</div>
+            <div class="message-time">${currentTime}</div>
+          </div>
+        `;
+        
+        chatbox.appendChild(messageDiv);
+        scrollToBottom();
+
+        updateSidebar(data, currentTime);
+      }
+
+      function handleFileMessage(data) {
+        const messageDiv = document.createElement("div");
+        messageDiv.className = "chat-message " + 
+          (data.sender === "{{ request.user.username }}" ? "sender" : "receiver");
+        
+        const currentTime = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        
+        messageDiv.innerHTML = `
+          <div class="message-bubble file-message">
+            <i class="fas fa-file"></i>
+            <a href="${data.file.url}" download="${data.file.name}">${data.file.name}</a>
+            <div class="message-time">${currentTime}</div>
+          </div>
+        `;
+        
+        chatbox.appendChild(messageDiv);
+        scrollToBottom();
+
+        updateSidebar({ message: `File: ${data.file.name}`, sender: data.sender }, currentTime);
+      }
+
+      function handleAudioMessage(data) {
+        const messageDiv = document.createElement("div");
+        messageDiv.className = "chat-message " + 
+          (data.sender === "{{ request.user.username }}" ? "sender" : "receiver");
+        
+        const currentTime = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        
+        messageDiv.innerHTML = `
+          <div class="message-bubble audio-message">
+            <audio controls src="${data.audio.url}"></audio>
+            <div class="message-time">${currentTime}</div>
+          </div>
+        `;
+        
+        chatbox.appendChild(messageDiv);
+        scrollToBottom();
+
+        updateSidebar({ message: "Voice message", sender: data.sender }, currentTime);
+      }
+
+      function updateSidebar(data, currentTime) {
+        const lastMessage = document.querySelector(".contact-item.active #last-message");
+        if (lastMessage) {
+          lastMessage.innerHTML = data.sender === "{{ request.user.username }}" 
+            ? "You: " + (data.message || "File/Voice message")
+            : (data.message || "File/Voice message");
+
+          const timestamp = document.querySelector(".contact-item.active .timestamp");
+          if (timestamp) {
+            timestamp.innerHTML = currentTime;
+          }
+        }
+      }
+
+      // Text message handling
       document.querySelector("#my_input").focus();
       document.querySelector("#my_input").onkeyup = function (e) {
         if (e.keyCode == 13) {
@@ -645,7 +863,6 @@
         var messageInput = document.querySelector("#my_input").value.trim();
 
         if (messageInput.length == 0) {
-          // Add a subtle shake animation for empty input
           const inputContainer = document.querySelector(".message-input-container");
           inputContainer.style.animation = "shake 0.5s ease-in-out";
           setTimeout(() => {
@@ -663,48 +880,216 @@
         }
       };
 
-      chatSocket.onmessage = function (e) {
-        const data = JSON.parse(e.data);
+      // File upload handling
+      document.querySelector("#fileUploadBtn").onclick = function() {
+        document.querySelector("#fileInput").click();
+      };
 
-        if (data.message && data.sender) {
-          const chatbox = document.querySelector("#chatbox");
-          const noMessages = document.querySelector(".no-messages");
-          if (noMessages) {
-            noMessages.style.display = "none";
-          }
-
-          const messageDiv = document.createElement("div");
-          messageDiv.className = "chat-message " + 
-            (data.sender === "{{ request.user.username }}" ? "sender" : "receiver");
-          
-          const currentTime = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-          
-          messageDiv.innerHTML = `
-            <div class="message-bubble">
-              <div>${data.message}</div>
-              <div class="message-time">${currentTime}</div>
-            </div>
-          `;
-          
-          chatbox.appendChild(messageDiv);
-          scrollToBottom();
-
-          // Update sidebar
-          const lastMessage = document.querySelector(".contact-item.active #last-message");
-          if (lastMessage) {
-            lastMessage.innerHTML = data.sender === "{{ request.user.username }}" 
-              ? "You: " + data.message 
-              : data.message;
-
-            const timestamp = document.querySelector(".contact-item.active .timestamp");
-            if (timestamp) {
-              timestamp.innerHTML = currentTime;
-            }
-          }
+      document.querySelector("#fileInput").onchange = function(e) {
+        const file = e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            chatSocket.send(JSON.stringify({
+              type: 'file',
+              file: {
+                name: file.name,
+                data: e.target.result,
+                size: file.size,
+                type: file.type
+              },
+              username: "{{ request.user.username }}",
+              room_name: "{{ room_name }}"
+            }));
+          };
+          reader.readAsDataURL(file);
         }
       };
 
-      // Add shake animation
+      // Voice message handling
+      document.querySelector("#recordButton").onclick = async function() {
+        if (!mediaRecorder || mediaRecorder.state === "inactive") {
+          try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            mediaRecorder = new MediaRecorder(stream);
+            recordedChunks = [];
+
+            mediaRecorder.ondataavailable = e => {
+              recordedChunks.push(e.data);
+            };
+
+            mediaRecorder.onstop = () => {
+              const blob = new Blob(recordedChunks, { type: 'audio/webm' });
+              const reader = new FileReader();
+              reader.onload = () => {
+                chatSocket.send(JSON.stringify({
+                  type: 'audio',
+                  audio: {
+                    data: reader.result,
+                    name: `voice-message-${Date.now()}.webm`
+                  },
+                  username: "{{ request.user.username }}",
+                  room_name: "{{ room_name }}"
+                }));
+              };
+              reader.readAsDataURL(blob);
+              stream.getTracks().forEach(track => track.stop());
+              this.classList.remove('recording');
+            };
+
+            mediaRecorder.start();
+            this.classList.add('recording');
+            this.innerHTML = '<i class="fas fa-stop"></i>';
+          } catch (err) {
+            console.error('Error accessing microphone:', err);
+          }
+        } else {
+          mediaRecorder.stop();
+          this.innerHTML = '<i class="fas fa-microphone"></i>';
+        }
+      };
+
+      // WebRTC call handling
+      async function startCall(isVideo) {
+        try {
+          localStream = await navigator.mediaDevices.getUserMedia({ 
+            video: isVideo, 
+            audio: true 
+          });
+          
+          document.querySelector("#localVideo").srcObject = localStream;
+          document.querySelector("#videoCallContainer").style.display = "flex";
+
+          peerConnection = new RTCPeerConnection(configuration);
+          
+          localStream.getTracks().forEach(track => {
+            peerConnection.addTrack(track, localStream);
+          });
+
+          peerConnection.ontrack = event => {
+            document.querySelector("#remoteVideo").srcObject = event.streams[0];
+          };
+
+          peerConnection.onicecandidate = event => {
+            if (event.candidate) {
+              chatSocket.send(JSON.stringify({
+                type: 'candidate',
+                candidate: event.candidate,
+                username: "{{ request.user.username }}",
+                room_name: "{{ room_name }}"
+              }));
+            }
+          };
+
+          const offer = await peerConnection.createOffer();
+          await peerConnection.setLocalDescription(offer);
+          
+          chatSocket.send(JSON.stringify({
+            type: 'offer',
+            offer: offer,
+            username: "{{ request.user.username }}",
+            room_name: "{{ room_name }}"
+          }));
+        } catch (err) {
+          console.error('Error starting call:', err);
+        }
+      }
+
+      async function handleOffer(data) {
+        if (!peerConnection) {
+          peerConnection = new RTCPeerConnection(configuration);
+          
+          peerConnection.ontrack = event => {
+            document.querySelector("#remoteVideo").srcObject = event.streams[0];
+          };
+
+          peerConnection.onicecandidate = event => {
+            if (event.candidate) {
+              chatSocket.send(JSON.stringify({
+                type: 'candidate',
+                candidate: event.candidate,
+                username: "{{ request.user.username }}",
+                room_name: "{{ room_name }}"
+              }));
+            }
+          };
+
+          localStream = await navigator.mediaDevices.getUserMedia({ 
+            video: true, 
+            audio: true 
+          });
+          document.querySelector("#localVideo").srcObject = localStream;
+          localStream.getTracks().forEach(track => {
+            peerConnection.addTrack(track, localStream);
+          });
+        }
+
+        await peerConnection.setRemoteDescription(new RTCSessionDescription(data.offer));
+        const answer = await peerConnection.createAnswer();
+        await peerConnection.setLocalDescription(answer);
+        
+        chatSocket.send(JSON.stringify({
+          type: 'answer',
+          answer: answer,
+          username: "{{ request.user.username }}",
+          room_name: "{{ room_name }}"
+        }));
+
+        document.querySelector("#videoCallContainer").style.display = "flex";
+      }
+
+      async function handleAnswer(data) {
+        await peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer));
+      }
+
+      async function handleCandidate(data) {
+        if (peerConnection) {
+          await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+        }
+      }
+
+      function endCall() {
+        if (localStream) {
+          localStream.getTracks().forEach(track => track.stop());
+        }
+        if (peerConnection) {
+          peerConnection.close();
+          peerConnection = null;
+        }
+        document.querySelector("#videoCallContainer").style.display = "none";
+        document.querySelector("#localVideo").srcObject = null;
+        document.querySelector("#remoteVideo").srcObject = null;
+      }
+
+      document.querySelector("#audioCallBtn").onclick = () => startCall(false);
+      document.querySelector("#videoCallBtn").onclick = () => startCall(true);
+
+      document.querySelector("#muteAudioBtn").onclick = () => {
+        isAudioMuted = !isAudioMuted;
+        localStream.getAudioTracks().forEach(track => {
+          track.enabled = !isAudioMuted;
+        });
+        this.innerHTML = `<i class="fas fa-microphone${isAudioMuted ? '-slash' : ''}"></i> ${isAudioMuted ? 'Unmute' : 'Mute'}`;
+      };
+
+      document.querySelector("#muteVideoBtn").onclick = () => {
+        isVideoMuted = !isVideoMuted;
+        localStream.getVideoTracks().forEach(track => {
+          track.enabled = !isVideoMuted;
+        });
+        this.innerHTML = `<i class="fas fa-video${isVideoMuted ? '-slash' : ''}"></i> Video ${isVideoMuted ? 'On' : 'Off'}`;
+      };
+
+      document.querySelector("#endCallBtn").onclick = () => {
+        chatSocket.send(JSON.stringify({
+          type: 'call_ended',
+          username: "{{ request.user.username }}",
+          room_name: "{{ room_name }}"
+        }));
+        endCall();
+      };
+
+      // Shake animation
       const style = document.createElement('style');
       style.textContent = `
         @keyframes shake {

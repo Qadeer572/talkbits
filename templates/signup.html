@@ -20,11 +20,11 @@
             align-items: center;
             justify-content: center;
             position: relative;
-            overflow: hidden;
-            padding: 20px 0;
+            overflow-x: hidden;
+            padding: 20px;
         }
 
-        /* Animated background elements */
+        /* Enhanced animated background */
         .bg-shapes {
             position: absolute;
             top: 0;
@@ -32,225 +32,262 @@
             width: 100%;
             height: 100%;
             z-index: 1;
+            overflow: hidden;
         }
 
         .shape {
             position: absolute;
             border-radius: 50%;
             background: rgba(255, 255, 255, 0.1);
-            animation: float 6s ease-in-out infinite;
+            animation: float 8s ease-in-out infinite;
+            backdrop-filter: blur(10px);
         }
 
         .shape:nth-child(1) {
-            width: 80px;
-            height: 80px;
-            top: 15%;
-            left: 15%;
+            width: 100px;
+            height: 100px;
+            top: 10%;
+            left: 10%;
             animation-delay: 0s;
         }
 
         .shape:nth-child(2) {
-            width: 120px;
-            height: 120px;
-            top: 60%;
-            right: 15%;
+            width: 150px;
+            height: 150px;
+            top: 70%;
+            right: 10%;
             animation-delay: 2s;
         }
 
         .shape:nth-child(3) {
-            width: 60px;
-            height: 60px;
-            bottom: 25%;
-            left: 20%;
+            width: 80px;
+            height: 80px;
+            bottom: 20%;
+            left: 15%;
             animation-delay: 4s;
         }
 
         .shape:nth-child(4) {
-            width: 100px;
-            height: 100px;
-            top: 25%;
-            right: 25%;
+            width: 120px;
+            height: 120px;
+            top: 20%;
+            right: 20%;
             animation-delay: 1s;
         }
 
+        .shape:nth-child(5) {
+            width: 60px;
+            height: 60px;
+            top: 50%;
+            left: 5%;
+            animation-delay: 3s;
+        }
+
         @keyframes float {
-            0%, 100% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(-20px) rotate(180deg); }
+            0%, 100% { 
+                transform: translateY(0px) rotate(0deg) scale(1); 
+                opacity: 0.6;
+            }
+            33% { 
+                transform: translateY(-30px) rotate(120deg) scale(1.1); 
+                opacity: 0.8;
+            }
+            66% { 
+                transform: translateY(-15px) rotate(240deg) scale(0.9); 
+                opacity: 0.4;
+            }
         }
 
         .signup-container {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(20px);
-            border-radius: 20px;
+            border-radius: 24px;
             padding: 40px;
             width: 100%;
-            max-width: 450px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            max-width: 480px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
             position: relative;
             z-index: 2;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
             animation: slideUp 0.8s ease-out;
         }
 
         @keyframes slideUp {
             from {
                 opacity: 0;
-                transform: translateY(30px);
+                transform: translateY(40px) scale(0.95);
             }
             to {
                 opacity: 1;
-                transform: translateY(0);
+                transform: translateY(0) scale(1);
             }
         }
 
         .signup-header {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 35px;
         }
 
         .signup-title {
-            font-size: 2.5rem;
-            font-weight: 700;
+            font-size: 2.8rem;
+            font-weight: 800;
             background: linear-gradient(135deg, #667eea, #764ba2);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
+            letter-spacing: -1px;
         }
 
         .signup-subtitle {
             color: #666;
-            font-size: 1rem;
+            font-size: 1.1rem;
             font-weight: 400;
+            opacity: 0.8;
         }
 
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 25px;
             position: relative;
         }
 
         .form-group label {
             display: block;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
             color: #333;
-            font-weight: 500;
-            font-size: 0.9rem;
+            font-weight: 600;
+            font-size: 0.95rem;
+            letter-spacing: 0.3px;
         }
 
         .input-wrapper {
             position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .input-wrapper:hover {
+            transform: translateY(-2px);
         }
 
         .input-wrapper i {
             position: absolute;
-            left: 15px;
+            left: 18px;
             top: 50%;
             transform: translateY(-50%);
             color: #999;
-            font-size: 1.1rem;
-            transition: color 0.3s ease;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            z-index: 3;
         }
 
         .form-control {
             width: 100%;
-            padding: 15px 15px 15px 45px;
-            border: 2px solid #e1e5e9;
-            border-radius: 12px;
+            padding: 18px 20px 18px 52px;
+            border: 2px solid #e8ecf0;
+            border-radius: 16px;
             font-size: 1rem;
-            transition: all 0.3s ease;
-            background: #f8f9fa;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: #fafbfc;
+            font-weight: 500;
         }
 
         .form-control:focus {
             outline: none;
             border-color: #667eea;
             background: white;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+            transform: translateY(-2px);
         }
 
         .form-control:focus + i {
             color: #667eea;
+            transform: translateY(-50%) scale(1.1);
         }
 
         .form-control.valid {
-            border-color: #28a745;
+            border-color: #10b981;
+            background: #f0fdf4;
         }
 
         .form-control.invalid {
-            border-color: #dc3545;
+            border-color: #ef4444;
+            background: #fef2f2;
         }
 
         .password-strength {
-            margin-top: 8px;
-            font-size: 0.8rem;
+            margin-top: 12px;
+            font-size: 0.85rem;
         }
 
         .strength-indicator {
-            height: 4px;
-            background: #e1e5e9;
-            border-radius: 2px;
-            margin-top: 5px;
+            height: 6px;
+            background: #e5e7eb;
+            border-radius: 3px;
+            margin-top: 8px;
             overflow: hidden;
         }
 
         .strength-bar {
             height: 100%;
             width: 0%;
-            transition: all 0.3s ease;
-            border-radius: 2px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 3px;
         }
 
-        .strength-weak { background: #dc3545; width: 25%; }
-        .strength-fair { background: #ffc107; width: 50%; }
-        .strength-good { background: #fd7e14; width: 75%; }
-        .strength-strong { background: #28a745; width: 100%; }
+        .strength-weak { background: linear-gradient(90deg, #ef4444, #dc2626); width: 25%; }
+        .strength-fair { background: linear-gradient(90deg, #f59e0b, #d97706); width: 50%; }
+        .strength-good { background: linear-gradient(90deg, #3b82f6, #2563eb); width: 75%; }
+        .strength-strong { background: linear-gradient(90deg, #10b981, #059669); width: 100%; }
 
         .password-match {
-            font-size: 0.8rem;
-            margin-top: 5px;
+            font-size: 0.85rem;
+            margin-top: 8px;
             opacity: 0;
-            transition: opacity 0.3s ease;
+            transition: all 0.3s ease;
+            font-weight: 500;
         }
 
         .password-match.show {
             opacity: 1;
+            transform: translateY(0);
         }
 
         .password-match.match {
-            color: #28a745;
+            color: #10b981;
         }
 
         .password-match.no-match {
-            color: #dc3545;
+            color: #ef4444;
         }
 
         .signup-btn {
             width: 100%;
-            padding: 15px;
+            padding: 18px;
             background: linear-gradient(135deg, #667eea, #764ba2);
             border: none;
-            border-radius: 12px;
+            border-radius: 16px;
             color: white;
             font-size: 1.1rem;
-            font-weight: 600;
+            font-weight: 700;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
             overflow: hidden;
-            margin-top: 10px;
+            margin-top: 15px;
+            letter-spacing: 0.5px;
         }
 
         .signup-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(102, 126, 234, 0.4);
         }
 
         .signup-btn:active {
-            transform: translateY(0);
+            transform: translateY(-1px);
         }
 
         .signup-btn:disabled {
-            background: #ccc;
+            background: #9ca3af;
             cursor: not-allowed;
             transform: none;
             box-shadow: none;
@@ -263,8 +300,8 @@
             left: -100%;
             width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-            transition: left 0.5s;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.6s ease;
         }
 
         .signup-btn:hover::before {
@@ -273,7 +310,7 @@
 
         .divider {
             text-align: center;
-            margin: 25px 0;
+            margin: 30px 0;
             position: relative;
         }
 
@@ -284,37 +321,53 @@
             left: 0;
             right: 0;
             height: 1px;
-            background: #e1e5e9;
+            background: linear-gradient(90deg, transparent, #e5e7eb, transparent);
         }
 
         .divider span {
             background: white;
-            padding: 0 20px;
-            color: #666;
+            padding: 0 25px;
+            color: #6b7280;
             font-size: 0.9rem;
+            font-weight: 500;
         }
 
         .login-link {
             text-align: center;
-            margin-top: 20px;
+            margin-top: 25px;
         }
 
         .login-link a {
             color: #667eea;
             text-decoration: none;
-            font-weight: 500;
-            transition: color 0.3s ease;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .login-link a::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.3s ease;
+        }
+
+        .login-link a:hover::after {
+            width: 100%;
         }
 
         .login-link a:hover {
             color: #764ba2;
-            text-decoration: underline;
         }
 
         .alert {
-            padding: 15px;
-            margin-bottom: 20px;
-            border-radius: 12px;
+            padding: 18px 20px;
+            margin-bottom: 25px;
+            border-radius: 16px;
             border: none;
             font-weight: 500;
             position: relative;
@@ -324,7 +377,7 @@
         @keyframes slideDown {
             from {
                 opacity: 0;
-                transform: translateY(-10px);
+                transform: translateY(-15px);
             }
             to {
                 opacity: 1;
@@ -333,55 +386,43 @@
         }
 
         .alert-success {
-            background: linear-gradient(135deg, #4facfe, #00f2fe);
+            background: linear-gradient(135deg, #10b981, #059669);
             color: white;
         }
 
         .alert-danger {
-            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+            background: linear-gradient(135deg, #ef4444, #dc2626);
             color: white;
         }
 
         .alert-warning {
-            background: linear-gradient(135deg, #ffeaa7, #fab1a0);
-            color: #2d3436;
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
         }
 
         .alert-info {
-            background: linear-gradient(135deg, #74b9ff, #0984e3);
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
             color: white;
         }
 
         .close {
             position: absolute;
-            top: 10px;
-            right: 15px;
+            top: 12px;
+            right: 18px;
             background: none;
             border: none;
             font-size: 1.5rem;
             cursor: pointer;
             color: inherit;
             opacity: 0.7;
-            transition: opacity 0.3s ease;
+            transition: all 0.3s ease;
         }
 
         .close:hover {
             opacity: 1;
+            transform: scale(1.1);
         }
 
-        /* Responsive design */
-        @media (max-width: 480px) {
-            .signup-container {
-                margin: 20px;
-                padding: 30px 25px;
-            }
-            
-            .signup-title {
-                font-size: 2rem;
-            }
-        }
-
-        /* Loading animation */
         .loading {
             opacity: 0.7;
             pointer-events: none;
@@ -392,10 +433,10 @@
             position: absolute;
             top: 50%;
             left: 50%;
-            width: 20px;
-            height: 20px;
-            margin: -10px 0 0 -10px;
-            border: 2px solid transparent;
+            width: 24px;
+            height: 24px;
+            margin: -12px 0 0 -12px;
+            border: 3px solid transparent;
             border-top-color: white;
             border-radius: 50%;
             animation: spin 1s linear infinite;
@@ -407,27 +448,219 @@
         }
 
         .requirements {
-            font-size: 0.8rem;
-            color: #666;
-            margin-top: 15px;
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 8px;
+            font-size: 0.85rem;
+            color: #6b7280;
+            margin-top: 20px;
+            padding: 20px;
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+            border-radius: 16px;
             border-left: 4px solid #667eea;
         }
 
         .requirements ul {
-            margin: 0;
+            margin: 8px 0 0 0;
             padding-left: 20px;
         }
 
         .requirements li {
-            margin-bottom: 5px;
+            margin-bottom: 6px;
+            line-height: 1.5;
+        }
+
+        .requirements strong {
+            color: #374151;
+        }
+
+        /* Enhanced Responsive Design */
+        @media (max-width: 640px) {
+            body {
+                padding: 15px;
+            }
+            
+            .signup-container {
+                padding: 30px 25px;
+                border-radius: 20px;
+                max-width: 100%;
+            }
+            
+            .signup-title {
+                font-size: 2.2rem;
+            }
+            
+            .signup-subtitle {
+                font-size: 1rem;
+            }
+            
+            .form-control {
+                padding: 16px 18px 16px 48px;
+                font-size: 16px; /* Prevents zoom on iOS */
+            }
+            
+            .signup-btn {
+                padding: 16px;
+                font-size: 1rem;
+            }
+            
+            .requirements {
+                padding: 18px;
+                font-size: 0.8rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .signup-container {
+                padding: 25px 20px;
+            }
+            
+            .signup-title {
+                font-size: 2rem;
+            }
+            
+            .form-group {
+                margin-bottom: 20px;
+            }
+            
+            .input-wrapper i {
+                left: 15px;
+            }
+            
+            .form-control {
+                padding: 15px 16px 15px 45px;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .signup-container {
+                padding: 20px 15px;
+            }
+            
+            .signup-title {
+                font-size: 1.8rem;
+            }
+            
+            .requirements {
+                padding: 15px;
+            }
+        }
+
+        /* Landscape mobile optimization */
+        @media (max-height: 600px) and (orientation: landscape) {
+            body {
+                padding: 10px 20px;
+            }
+            
+            .signup-container {
+                padding: 25px 30px;
+            }
+            
+            .signup-header {
+                margin-bottom: 20px;
+            }
+            
+            .form-group {
+                margin-bottom: 15px;
+            }
+            
+            .requirements {
+                margin-top: 15px;
+                padding: 15px;
+            }
+        }
+
+        /* Tablet styles */
+        @media (min-width: 641px) and (max-width: 1024px) {
+            .signup-container {
+                max-width: 520px;
+                padding: 45px;
+            }
+            
+            .signup-title {
+                font-size: 3rem;
+            }
+        }
+
+        /* Desktop enhancements */
+        @media (min-width: 1025px) {
+            .signup-container {
+                max-width: 500px;
+                padding: 50px;
+            }
+            
+            .signup-title {
+                font-size: 3.2rem;
+            }
+            
+            .form-control:hover {
+                border-color: #d1d5db;
+            }
+        }
+
+        /* High DPI displays */
+        @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+            .signup-container {
+                backdrop-filter: blur(25px);
+            }
+        }
+
+        /* Dark mode support */
+        @media (prefers-color-scheme: dark) {
+            .signup-container {
+                background: rgba(17, 24, 39, 0.95);
+                color: #f9fafb;
+            }
+            
+            .signup-subtitle {
+                color: #d1d5db;
+            }
+            
+            .form-group label {
+                color: #f3f4f6;
+            }
+            
+            .form-control {
+                background: rgba(31, 41, 55, 0.8);
+                border-color: #4b5563;
+                color: #f9fafb;
+            }
+            
+            .form-control:focus {
+                background: rgba(31, 41, 55, 0.95);
+            }
+            
+            .requirements {
+                background: rgba(31, 41, 55, 0.6);
+                color: #d1d5db;
+            }
+            
+            .requirements strong {
+                color: #f3f4f6;
+            }
+        }
+
+        /* Accessibility improvements */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        /* Focus visible for keyboard navigation */
+        .form-control:focus-visible {
+            outline: 3px solid #667eea;
+            outline-offset: 2px;
+        }
+
+        .signup-btn:focus-visible {
+            outline: 3px solid #667eea;
+            outline-offset: 2px;
         }
     </style>
 </head>
 <body>
     <div class="bg-shapes">
+        <div class="shape"></div>
         <div class="shape"></div>
         <div class="shape"></div>
         <div class="shape"></div>
@@ -459,7 +692,7 @@
             <div class="form-group">
                 <label for="email">Email Address</label>
                 <div class="input-wrapper">
-                    <input type="email" class="form-control" id="email" name="email" required>
+                    <input type="email" class="form-control" id="email" name="email" required autocomplete="email">
                     <i class="fas fa-envelope"></i>
                 </div>
             </div>
@@ -467,7 +700,7 @@
             <div class="form-group">
                 <label for="username">Username</label>
                 <div class="input-wrapper">
-                    <input type="text" class="form-control" id="username" name="username" required>
+                    <input type="text" class="form-control" id="username" name="username" required autocomplete="username">
                     <i class="fas fa-user"></i>
                 </div>
             </div>
@@ -475,7 +708,7 @@
             <div class="form-group">
                 <label for="password">Password</label>
                 <div class="input-wrapper">
-                    <input type="password" class="form-control" id="password" name="password" required>
+                    <input type="password" class="form-control" id="password" name="password" required autocomplete="new-password">
                     <i class="fas fa-lock"></i>
                 </div>
                 <div class="password-strength">
@@ -489,7 +722,7 @@
             <div class="form-group">
                 <label for="confirm_password">Confirm Password</label>
                 <div class="input-wrapper">
-                    <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+                    <input type="password" class="form-control" id="confirm_password" name="confirm_password" required autocomplete="new-password">
                     <i class="fas fa-lock"></i>
                 </div>
                 <div class="password-match" id="passwordMatch"></div>
@@ -539,19 +772,19 @@
             } else if (score <= 2) {
                 strengthBar.classList.add('strength-weak');
                 strengthText.textContent = 'Weak password';
-                strengthText.style.color = '#dc3545';
+                strengthText.style.color = '#ef4444';
             } else if (score === 3) {
                 strengthBar.classList.add('strength-fair');
                 strengthText.textContent = 'Fair password';
-                strengthText.style.color = '#ffc107';
+                strengthText.style.color = '#f59e0b';
             } else if (score === 4) {
                 strengthBar.classList.add('strength-good');
                 strengthText.textContent = 'Good password';
-                strengthText.style.color = '#fd7e14';
+                strengthText.style.color = '#3b82f6';
             } else {
                 strengthBar.classList.add('strength-strong');
                 strengthText.textContent = 'Strong password';
-                strengthText.style.color = '#28a745';
+                strengthText.style.color = '#10b981';
             }
         }
 
@@ -656,6 +889,21 @@
                 this.classList.remove('valid');
             }
         });
+
+        // Touch device optimization
+        if ('ontouchstart' in window) {
+            document.querySelectorAll('.input-wrapper').forEach(wrapper => {
+                wrapper.addEventListener('touchstart', function() {
+                    this.style.transform = 'translateY(-2px)';
+                });
+                
+                wrapper.addEventListener('touchend', function() {
+                    setTimeout(() => {
+                        this.style.transform = 'translateY(0)';
+                    }, 150);
+                });
+            });
+        }
     </script>
 </body>
 </html>

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>WebRTC Call</title>
+  <link rel="icon" href="data:,">
+</head>
+<body>
+  <h2>WebRTC Audio/Video Call</h2>
+  <video id="localVideo" autoplay muted playsinline style="width: 45%;"></video>
+  <video id="remoteVideo" autoplay playsinline style="width: 45%;"></video>
+
+  <script>
+    const roomName = "testroom";
+    let isCaller = false;
+    let hasRemoteDescription = false;
+  
+    const wsProtocol = location.protocol === "https:" ? "wss" : "ws";
+    const socket = new WebSocket(`${wsProtocol}://${location.host}/ws/call/${roomName}/`);
+  
+    const peer = new RTCPeerConnection({
+      iceServers: [{ urls: "stun:stun.l.google.com:19302" }]
+    });
+  
+    peer.onicecandidate = (event) => {
+      if (event.candidate) {
+        socket.send(JSON.stringify({ type: "candidate", candidate: event.candidate }));
+      }
+    };
+  
+    peer.ontrack = (event) => {
+      document.getElementById("remoteVideo").srcObject = event.streams[0];
+    };
+  
+    navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+      .then(stream => {
+        document.getElementById("localVideo").srcObject = stream;
+        stream.getTracks().forEach(track => peer.addTrack(track, stream));
+      });
+  
+    socket.onopen = () => {
+      // If you're the first to connect, you become the caller
+      socket.send(JSON.stringify({ type: "join", room: roomName }));
+    };
+  
+    socket.onmessage = async (event) => {
+      const data = JSON.parse(event.data);
+  
+      if (data.type === "join_ack") {
+        isCaller = data.initiator;
+        if (isCaller) {
+          const offer = await peer.createOffer();
+          await peer.setLocalDescription(offer);
+          socket.send(JSON.stringify(peer.localDescription));
+        }
+        console.log("JOIN ACK", data.initiator);
+    console.log("Received offer", data);
+    console.log("Received answer", data);
+    console.log("Received candidate", data);
+    console.log("Remote description set:", peer.remoteDescription);
+    console.log("Track received", event.streams);
+      }
+  
+      if (data.type === "offer" && !isCaller) {
+        await peer.setRemoteDescription(new RTCSessionDescription(data));
+        const answer = await peer.createAnswer();
+        await peer.setLocalDescription(answer);
+        socket.send(JSON.stringify(peer.localDescription));
+      }
+  
+      if (data.type === "answer" && isCaller) {
+        if (!peer.remoteDescription) {
+          await peer.setRemoteDescription(new RTCSessionDescription(data));
+        }
+      }
+  
+      if (data.type === "candidate") {
+        await peer.addIceCandidate(new RTCIceCandidate(data.candidate));
+      }
+    };
+    
+
+  </script>
+  
+</body>
+</html>
