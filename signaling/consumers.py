@@ -1,13 +1,15 @@
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
-
+from django.contrib.auth.models import User
+from asgiref.sync import sync_to_async
 # Track first user per room
 initiators = set()
 
 class CallConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.room_name = self.scope['url_route']['kwargs']['room_name']
-        user1 = self.scope['user'].username 
+        self.username = self.scope['user'].username
+        user1 = self.username 
         user2 = self.room_name
         self.room_group_name = f"chat_{''.join(sorted([user1, user2]))}"
 
@@ -37,6 +39,7 @@ class CallConsumer(AsyncWebsocketConsumer):
             return
 
         if data["type"] in ["call_accept", "call_reject"]:
+            print("hello world")
             await self.channel_layer.group_send(
                 self.room_group_name,
                 {
