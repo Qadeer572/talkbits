@@ -16,11 +16,16 @@ def login_page(request):
         if user is not None:
             login(request, user)
             messages.success(request, 'Login successful!')
-            return redirect('/chat/kishan/')
-        else:
+            if request.user.username == 'admin1':
+                return redirect('/chat/Babar/')
+            else:
+                return redirect('/chat/admin1/')
             messages.error(request, 'Invalid email or password. Please try again.')
     if request.user.is_authenticated:
-        return redirect('/chat/kishan/')
+        if request.user.username == 'admin1':
+            return redirect('/chat/Babar/')
+        else:
+            return redirect('/chat/admin1/')
     return render(request,'login.html')
 
 
@@ -56,7 +61,12 @@ def signup_view(request):
         user.save()
         messages.success(request, 'Signup successful! You can now log in.')
         return redirect('login')
+        
     if request.user.is_authenticated:
-        return redirect('/chat/kishan/') #todo: pass usename
+        if request.user.username == 'admin1':
+            return redirect('/chat/Babar/') #todo: pass usename
+        else:
+            return redirect('/chat/admin1/')
+        
     return render(request, 'signup.html')
 

@@ -3,6 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="data:,">
+
     <title>{{ room_name }}</title>
     <link
       rel="stylesheet"
@@ -811,6 +813,7 @@
         object-fit: cover;
         display: block;
         border-radius: 13px;
+        background: #000;
       }
 
       .video-label {
@@ -1352,38 +1355,38 @@
       };
 
       // Handle Call Invitation
-function handleCallInvitation(data) {
-  try {
-    console.log("Received call invitation:", data);
-    const modal = document.getElementById('callInvitationModal');
-    const callerAvatar = document.getElementById('callerAvatar');
-    const callerName = document.getElementById('callerName');
-    const callType = document.getElementById('callType');
+      function handleCallInvitation(data) {
+        try {
+          console.log("Received call invitation:", data);
+          const modal = document.getElementById('callInvitationModal');
+          const callerAvatar = document.getElementById('callerAvatar');
+          const callerName = document.getElementById('callerName');
+          const callType = document.getElementById('callType');
 
-    if (!modal || !callerAvatar || !callerName || !callType) {
-      console.error("Modal elements missing:", {
-        modal: !!modal,
-        callerAvatar: !!callerAvatar,
-        callerName: !!callerName,
-        callType: !!callType
-      });
-      return;
-    }
+          if (!modal || !callerAvatar || !callerName || !callType) {
+            console.error("Modal elements missing:", {
+              modal: !!modal,
+              callerAvatar: !!callerAvatar,
+              callerName: !!callerName,
+              callType: !!callType
+            });
+            return;
+          }
 
-    callerAvatar.src = `https://ui-avatars.com/api/?name=${data.from}&size=80&background=random`;
-    callerName.textContent = data.from;
-    callType.textContent = `Incoming ${data.call_type} call`;
-    
-    console.log("Setting modal display to flex");
-    modal.style.display = 'flex';
-    console.log("Modal display style after setting:", modal.style.display);
-    
-    showRingingIndicator(data.from);
-    window.incomingCallData = data;
-  } catch (error) {
-    console.error("Error in handleCallInvitation:", error);
-  }
-}
+          callerAvatar.src = `https://ui-avatars.com/api/?name=${data.from}&size=80&background=random`;
+          callerName.textContent = data.from;
+          callType.textContent = `Incoming ${data.call_type} call`;
+          
+          console.log("Setting modal display to flex");
+          modal.style.display = 'flex';
+          console.log("Modal display style after setting:", modal.style.display);
+          
+          showRingingIndicator(data.from);
+          window.incomingCallData = data;
+        } catch (error) {
+          console.error("Error in handleCallInvitation:", error);
+        }
+      }
 
       function handleCallAccepted(data) {
         console.log("Call accepted:", data);
@@ -1431,7 +1434,7 @@ function handleCallInvitation(data) {
       function showRingingIndicator(username) {
         console.log("Attempting to show ringing indicator for username:", username);
         const contactItem = document.querySelector(`.contact-item[data-id="${username}"]`);
-      //  if (contactItem) {
+        if (contactItem) {
           console.log("Found contact item:", contactItem);
           contactItem.classList.add('ringing');
           const ringingIndicator = contactItem.querySelector('.ringing-indicator');
@@ -1441,16 +1444,16 @@ function handleCallInvitation(data) {
           } else {
             console.error("Ringing indicator not found in contact item for username:", username);
           }
-        //} else {
-        //  console.error("Contact item not found for username:", username);
-       // }
+        } else {
+          console.error("Contact item not found for username:", username);
+        }
       }
 
-          // Hide Ringing Indicator
+      // Hide Ringing Indicator
       function hideRingingIndicator(username) {
         console.log("Attempting to hide ringing indicator for username:", username);
         const contactItem = document.querySelector(`.contact-item[data-id="${username}"]`);
-     //   if (!contactItem) {
+        if (contactItem) {
           contactItem.classList.remove('ringing');
           const ringingIndicator = contactItem.querySelector('.ringing-indicator');
           if (ringingIndicator) {
@@ -1458,9 +1461,9 @@ function handleCallInvitation(data) {
           } else {
             console.error("Ringing indicator not found in contact item for username:", username);
           }
-      //  } else {
-       //   console.error("Contact item not found for username:", username);
-       // }
+        } else {
+          console.error("Contact item not found for username:", username);
+        }
       }
 
       // Accept call
@@ -1539,59 +1542,60 @@ function handleCallInvitation(data) {
       }
 
       function initiateCall(type) {
-  if (isCallActive) {
-    console.warn("Call already active, cannot initiate new call");
-    return;
-  }
-  
-  console.log(`Initiating ${type} call to {{ room_name }}`);
-  
-  outgoingCallData = {
-    type: type,
-    to: "{{ room_name }}"
-  };
-  
-  const modal = document.getElementById('outgoingCallModal');
-  const receiverAvatar = document.getElementById('receiverAvatar');
-  const receiverName = document.getElementById('receiverName');
-  const outgoingCallType = document.getElementById('outgoingCallType');
+        if (isCallActive) {
+          console.warn("Call already active, cannot initiate new call");
+          return;
+        }
+        
+        console.log(`Initiating ${type} call to {{ room_name }}`);
+        
+        outgoingCallData = {
+          type: type,
+          to: "{{ room_name }}"
+        };
+        
+        const modal = document.getElementById('outgoingCallModal');
+        const receiverAvatar = document.getElementById('receiverAvatar');
+        const receiverName = document.getElementById('receiverName');
+        const outgoingCallType = document.getElementById('outgoingCallType');
 
-  if (!modal || !receiverAvatar || !receiverName || !outgoingCallType) {
-    console.error("Outgoing call modal elements missing:", {
-      modal: !!modal,
-      receiverAvatar: !!receiverAvatar,
-      receiverName: !!receiverName,
-      outgoingCallType: !!outgoingCallType
-    });
-    return;
-  }
+        if (!modal || !receiverAvatar || !receiverName || !outgoingCallType) {
+          console.error("Outgoing call modal elements missing:", {
+            modal: !!modal,
+            receiverAvatar: !!receiverAvatar,
+            receiverName: !!receiverName,
+            outgoingCallType: !!outgoingCallType
+          });
+          return;
+        }
 
-  receiverAvatar.src = `https://ui-avatars.com/api/?name={{ room_name }}&size=80&background=random`;
-  receiverName.textContent = "{{ room_name }}";
-  outgoingCallType.textContent = `${type} call...`;
-  
-  console.log("Setting outgoing call modal display to flex");
-  modal.style.display = 'flex';
-  
-  const button = type === 'video' ? document.getElementById('videoCallBtn') : document.getElementById('audioCallBtn');
-  button.classList.add('calling');
-  button.disabled = true;
-  
-  showRingingIndicator("{{ room_name }}");
-  
-  console.log("Sending call_request:", {
-    type: 'call_request',
-    call_type: type,
-    from: "{{ request.user.username }}",
-    to: "{{ room_name }}"
-  });
-  callSocket.send(JSON.stringify({
-    type: 'call_request',
-    call_type: type,
-    from: "{{ request.user.username }}",
-    to: "{{ room_name }}"
-  }));
-}
+        receiverAvatar.src = `https://ui-avatars.com/api/?name={{ room_name }}&size=80&background=random`;
+        receiverName.textContent = "{{ room_name }}";
+        outgoingCallType.textContent = `${type} call...`;
+        
+        console.log("Setting outgoing call modal display to flex");
+        modal.style.display = 'flex';
+        
+        const button = type === 'video' ? document.getElementById('videoCallBtn') : document.getElementById('audioCallBtn');
+        button.classList.add('calling');
+        button.disabled = true;
+        
+        showRingingIndicator("{{ room_name }}");
+        
+        console.log("Sending call_request:", {
+          type: 'call_request',
+          call_type: type,
+          from: "{{ request.user.username }}",
+          to: "{{ room_name }}"
+        });
+        callSocket.send(JSON.stringify({
+          type: 'call_request',
+          call_type: type,
+          from: "{{ request.user.username }}",
+          to: "{{ room_name }}"
+        }));
+      }
+
       // Reset call buttons
       function resetCallButtons() {
         const audioBtn = document.getElementById('audioCallBtn');
@@ -1656,33 +1660,57 @@ function handleCallInvitation(data) {
         statusEl.textContent = message;
       }
 
-      // WebRTC Functions
+      // WebRTC Functions - FIXED VERSION
       function createPeerConnection() {
+        console.log("Creating peer connection...");
         peerConnection = new RTCPeerConnection(configuration);
         
-        // Add local stream tracks
-        if (localStream) {
-          localStream.getTracks().forEach(track => {
-            peerConnection.addTrack(track, localStream);
-            console.log(`Added ${track.kind} track to peer connection`);
-          });
-        }
-        
-        // Handle remote stream
+        // CRITICAL: Set up ontrack handler BEFORE adding tracks
         peerConnection.ontrack = (event) => {
-          console.log(`Received remote ${event.track.kind} track`);
+          console.log("=== ONTRACK EVENT FIRED ===");
+          console.log("Event streams:", event.streams);
+          console.log("Event track:", event.track);
+          console.log("Track kind:", event.track.kind);
+          
           const remoteVideo = document.getElementById("remoteVideo");
           
           if (event.streams && event.streams[0]) {
+            console.log("Setting remote stream to video element");
             remoteVideo.srcObject = event.streams[0];
-            console.log("Remote stream assigned to video element");
-            updateConnectionStatus('connected', 'Connected');
             
-            if (!callTimer) {
-              startCallTimer();
+            // Force play the video
+            const playPromise = remoteVideo.play();
+            if (playPromise !== undefined) {
+              playPromise.then(() => {
+                console.log("Remote video started playing successfully");
+                updateConnectionStatus('connected', 'Connected');
+                
+                if (!callTimer) {
+                  startCallTimer();
+                }
+              }).catch(e => {
+                console.error("Error playing remote video:", e);
+                // Retry after a short delay
+                setTimeout(() => {
+                  remoteVideo.play().catch(err => console.error("Retry play failed:", err));
+                }, 1000);
+              });
             }
+          } else {
+            console.error("No remote stream received in ontrack event");
           }
         };
+        
+        // Add local stream tracks AFTER setting up event handlers
+        if (localStream) {
+          console.log("Adding local stream tracks to peer connection");
+          localStream.getTracks().forEach(track => {
+            const sender = peerConnection.addTrack(track, localStream);
+            console.log(`Added ${track.kind} track to peer connection:`, sender);
+          });
+        } else {
+          console.warn("No local stream available when creating peer connection");
+        }
         
         // Handle ICE candidates
         peerConnection.onicecandidate = (event) => {
@@ -1694,6 +1722,8 @@ function handleCallInvitation(data) {
               username: "{{ request.user.username }}",
               room_name: "{{ room_name }}"
             }));
+          } else {
+            console.log("ICE gathering completed");
           }
         };
         
@@ -1734,6 +1764,8 @@ function handleCallInvitation(data) {
             peerConnection.restartIce();
           }
         };
+        
+        console.log("Peer connection created successfully");
       }
 
       // Handle WebSocket messages
@@ -1743,9 +1775,10 @@ function handleCallInvitation(data) {
         if (data.initiator) {
           // Create offer
           try {
+            console.log("Creating offer...");
             const offer = await peerConnection.createOffer({
               offerToReceiveAudio: true,
-              offerToReceiveVideo: true
+              offerToReceiveVideo: currentCallType === 'video'
             });
             await peerConnection.setLocalDescription(offer);
             
@@ -1764,17 +1797,20 @@ function handleCallInvitation(data) {
       }
 
       async function handleOffer(data) {
-        if (!peerConnection) {
-          createPeerConnection();
-        }
-        
         try {
           console.log("Processing received offer");
+          
+          if (!peerConnection) {
+            console.log("Creating peer connection for incoming offer");
+            createPeerConnection();
+          }
+          
           await peerConnection.setRemoteDescription(new RTCSessionDescription({
             type: "offer",
             sdp: data.sdp
           }));
           
+          console.log("Creating answer...");
           const answer = await peerConnection.createAnswer();
           await peerConnection.setLocalDescription(answer);
           
@@ -1806,22 +1842,26 @@ function handleCallInvitation(data) {
 
       async function handleCandidate(data) {
         try {
-          console.log("Processing ICE candidate:", data.candidate.type || 'unknown');
-          await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
-          console.log("ICE candidate added successfully");
+          if (peerConnection && peerConnection.remoteDescription) {
+            console.log("Processing ICE candidate:", data.candidate.type || 'unknown');
+            await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+            console.log("ICE candidate added successfully");
+          } else {
+            console.warn("Received ICE candidate before remote description was set");
+          }
         } catch (error) {
           console.error("Error handling candidate:", error);
         }
       }
 
-      // Start call (after acceptance)
+      // Start call (after acceptance) - FIXED VERSION
       async function startCall(type) {
         try {
           console.log(`Starting ${type} call...`);
           currentCallType = type;
           updateConnectionStatus('connecting', 'Starting call...');
           
-          // Get user media
+          // Get user media FIRST
           const constraints = {
             audio: true,
             video: type === 'video' ? { 
@@ -1830,12 +1870,20 @@ function handleCallInvitation(data) {
             } : false
           };
           
+          console.log("Requesting user media with constraints:", constraints);
           localStream = await navigator.mediaDevices.getUserMedia(constraints);
+          console.log("Local stream obtained:", localStream);
+          console.log("Local stream tracks:", localStream.getTracks());
           
+          // Set up UI
           if (type === 'video') {
-            document.getElementById("localVideo").srcObject = localStream;
+            const localVideo = document.getElementById("localVideo");
+            localVideo.srcObject = localStream;
             document.getElementById("videoCallContainer").style.display = "flex";
             document.getElementById('callStatusText').textContent = 'Video Call';
+            
+            // Ensure local video plays
+            localVideo.play().catch(e => console.error("Error playing local video:", e));
           } else {
             document.getElementById("videoCallContainer").style.display = "flex";
             document.getElementById('callStatusText').textContent = 'Audio Call';
@@ -1849,7 +1897,7 @@ function handleCallInvitation(data) {
           
           isCallActive = true;
           
-          // Create peer connection
+          // Create peer connection AFTER getting local stream
           createPeerConnection();
           
           // Join call room
@@ -1881,8 +1929,12 @@ function handleCallInvitation(data) {
           localStream = null;
         }
         
-        document.getElementById('localVideo').srcObject = null;
-        document.getElementById('remoteVideo').srcObject = null;
+        // Clear video sources
+        const localVideo = document.getElementById('localVideo');
+        const remoteVideo = document.getElementById('remoteVideo');
+        localVideo.srcObject = null;
+        remoteVideo.srcObject = null;
+        
         document.getElementById("videoCallContainer").style.display = "none";
         
         // Reset UI
