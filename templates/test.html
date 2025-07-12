@@ -1,85 +1,497 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>WebRTC Call</title>
+  <title>Video Call</title>
   <link rel="icon" href="data:,">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-color: #f0f0f0;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    h2 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 30px;
+    }
+    
+    .video-container {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    
+    .video-wrapper {
+      position: relative;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    
+    video {
+      width: 400px;
+      height: 300px;
+      object-fit: cover;
+      display: block;
+    }
+    
+    .video-label {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: rgba(0,0,0,0.7);
+      color: white;
+      padding: 5px 10px;
+      border-radius: 5px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+    
+    .local-video {
+      border: 3px solid #007bff;
+    }
+    
+    .remote-video {
+      border: 3px solid #28a745;
+    }
+    
+    .status {
+      text-align: center;
+      padding: 10px;
+      margin: 20px 0;
+      border-radius: 5px;
+      font-weight: bold;
+    }
+    
+    .status.connected {
+      background-color: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    
+    .status.connecting {
+      background-color: #fff3cd;
+      color: #856404;
+      border: 1px solid #ffeaa7;
+    }
+    
+    .status.disconnected {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+    
+    .controls {
+      text-align: center;
+      margin-top: 20px;
+    }
+    
+    button {
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      margin: 0 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    
+    button:hover {
+      background: #0056b3;
+    }
+    
+    button:disabled {
+      background: #6c757d;
+      cursor: not-allowed;
+    }
+    
+    .debug {
+      margin-top: 20px;
+      padding: 15px;
+      background: #f8f9fa;
+      border-radius: 5px;
+      font-family: monospace;
+      font-size: 12px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    
+    @media (max-width: 768px) {
+      .video-container {
+        flex-direction: column;
+        align-items: center;
+      }
+      
+      video {
+        width: 100%;
+        max-width: 400px;
+      }
+    }
+  </style>
 </head>
 <body>
-  <h2>WebRTC Audio/Video Call</h2>
-  <video id="localVideo" autoplay muted playsinline style="width: 45%;"></video>
-  <video id="remoteVideo" autoplay playsinline style="width: 45%;"></video>
+  <div class="container">
+    <h2>🎥 WebRTC Video Call</h2>
+    
+    <div id="status" class="status disconnected">
+      Connecting to server...
+    </div>
+    
+    <div class="video-container">
+      <div class="video-wrapper local-video">
+        <video id="localVideo" autoplay muted playsinline></video>
+        <div class="video-label">You (Local)</div>
+      </div>
+      <div class="video-wrapper remote-video">
+        <video id="remoteVideo" autoplay playsinline></video>
+        <div class="video-label">Remote User</div>
+      </div>
+    </div>
+    
+    <div class="controls">
+      <button id="toggleVideo" onclick="toggleVideo()">📹 Video On</button>
+      <button id="toggleAudio" onclick="toggleAudio()">🎤 Audio On</button>
+      <button id="hangup" onclick="hangUp()">📞 Hang Up</button>
+    </div>
+    
+    <div id="debug" class="debug"></div>
+  </div>
 
   <script>
     const roomName = "testroom";
     let isCaller = false;
-    let hasRemoteDescription = false;
-  
-    const wsProtocol = location.protocol === "https:" ? "wss" : "ws";
-    const socket = new WebSocket(`${wsProtocol}://${location.host}/ws/call/${roomName}/`);
-  
+    let localStream = null;
+    let remoteStream = null;
+    let isVideoEnabled = true;
+    let isAudioEnabled = true;
+    
+    // Status and debug functions
+    function updateStatus(message, type = 'connecting') {
+      const statusEl = document.getElementById('status');
+      statusEl.textContent = message;
+      statusEl.className = `status ${type}`;
+    }
+    
+    function addDebugLog(message) {
+      const debugEl = document.getElementById('debug');
+      const timestamp = new Date().toLocaleTimeString();
+      debugEl.innerHTML += `[${timestamp}] ${message}<br>`;
+      debugEl.scrollTop = debugEl.scrollHeight;
+      console.log(message);
+    }
+
+    // WebSocket connection with better error handling
+    let socket;
+    let reconnectAttempts = 0;
+    const maxReconnectAttempts = 5;
+    
+    function connectWebSocket() {
+      try {
+        const wsUrl = `ws://${window.location.host}/ws/call/${roomName}/`;
+        addDebugLog(`Connecting to WebSocket: ${wsUrl}`);
+        socket = new WebSocket(wsUrl);
+        
+        socket.onopen = () => {
+          addDebugLog("WebSocket connected successfully");
+          updateStatus("Connected to server", 'connected');
+          reconnectAttempts = 0;
+          
+          // Send join message after adding tracks
+          if (localStream) {
+            localStream.getTracks().forEach(track => {
+              peer.addTrack(track, localStream);
+              addDebugLog(`Added ${track.kind} track to peer connection`);
+            });
+            
+            socket.send(JSON.stringify({ type: "join", room: roomName }));
+            addDebugLog(`Sent join message for room: ${roomName}`);
+          }
+        };
+        
+        socket.onclose = (event) => {
+          addDebugLog(`WebSocket closed: ${event.code} - ${event.reason}`);
+          updateStatus("Disconnected from server", 'disconnected');
+          
+          if (reconnectAttempts < maxReconnectAttempts) {
+            reconnectAttempts++;
+            addDebugLog(`Attempting to reconnect (${reconnectAttempts}/${maxReconnectAttempts})...`);
+            setTimeout(connectWebSocket, 2000 * reconnectAttempts);
+          }
+        };
+        
+        socket.onerror = (error) => {
+          addDebugLog(`WebSocket error: ${error}`);
+          updateStatus("Connection error", 'disconnected');
+        };
+        
+        socket.onmessage = handleWebSocketMessage;
+        
+      } catch (error) {
+        addDebugLog(`Failed to create WebSocket: ${error.message}`);
+        updateStatus("Failed to connect", 'disconnected');
+      }
+    }
+
+    // RTCPeerConnection setup
     const peer = new RTCPeerConnection({
-      iceServers: [{ urls: "stun:stun.l.google.com:19302" }]
+      iceServers: [
+        { urls: "stun:stun.l.google.com:19302" },
+        { urls: "stun:stun1.l.google.com:19302" },
+        {
+          urls: "turn:openrelay.metered.ca:443",
+          username: "openrelayproject",
+          credential: "openrelayproject"
+        }
+      ]
     });
-  
+
+    // ICE candidate handling
     peer.onicecandidate = (event) => {
       if (event.candidate) {
-        socket.send(JSON.stringify({ type: "candidate", candidate: event.candidate }));
+        if (socket && socket.readyState === WebSocket.OPEN) {
+          socket.send(JSON.stringify({ 
+            type: "candidate", 
+            candidate: event.candidate 
+          }));
+          addDebugLog(`Sent ICE candidate: ${event.candidate.type}`);
+        } else {
+          addDebugLog("Cannot send ICE candidate - WebSocket not ready");
+        }
+      } else {
+        addDebugLog("ICE candidate gathering completed");
       }
     };
-  
+
+    // FIXED: Remote track handling
     peer.ontrack = (event) => {
-      document.getElementById("remoteVideo").srcObject = event.streams[0];
-    };
-  
-    navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-      .then(stream => {
-        document.getElementById("localVideo").srcObject = stream;
-        stream.getTracks().forEach(track => peer.addTrack(track, stream));
+      addDebugLog(`Received remote ${event.track.kind} track`);
+      
+      const remoteVideo = document.getElementById("remoteVideo");
+      
+      // Create new MediaStream if needed
+      if (!remoteStream) {
+        remoteStream = new MediaStream();
+        remoteVideo.srcObject = remoteStream;
+        addDebugLog("Created new remote MediaStream");
+      }
+      
+      // Add the track to the remote stream
+      remoteStream.addTrack(event.track);
+      addDebugLog(`Added ${event.track.kind} track to remote stream`);
+      
+      // Ensure video plays
+      remoteVideo.play().catch(error => {
+        addDebugLog(`Error playing remote video: ${error.message}`);
       });
-  
-    socket.onopen = () => {
-      // If you're the first to connect, you become the caller
-      socket.send(JSON.stringify({ type: "join", room: roomName }));
+      
+      updateStatus("Call connected - Remote video should be visible", 'connected');
     };
-  
-    socket.onmessage = async (event) => {
-      const data = JSON.parse(event.data);
-  
-      if (data.type === "join_ack") {
-        isCaller = data.initiator;
-        if (isCaller) {
-          const offer = await peer.createOffer();
-          await peer.setLocalDescription(offer);
-          socket.send(JSON.stringify(peer.localDescription));
-        }
-        console.log("JOIN ACK", data.initiator);
-    console.log("Received offer", data);
-    console.log("Received answer", data);
-    console.log("Received candidate", data);
-    console.log("Remote description set:", peer.remoteDescription);
-    console.log("Track received", event.streams);
-      }
-  
-      if (data.type === "offer" && !isCaller) {
-        await peer.setRemoteDescription(new RTCSessionDescription(data));
-        const answer = await peer.createAnswer();
-        await peer.setLocalDescription(answer);
-        socket.send(JSON.stringify(peer.localDescription));
-      }
-  
-      if (data.type === "answer" && isCaller) {
-        if (!peer.remoteDescription) {
-          await peer.setRemoteDescription(new RTCSessionDescription(data));
-        }
-      }
-  
-      if (data.type === "candidate") {
-        await peer.addIceCandidate(new RTCIceCandidate(data.candidate));
+
+    // Connection state monitoring
+    peer.oniceconnectionstatechange = () => {
+      addDebugLog(`ICE connection state: ${peer.iceConnectionState}`);
+      
+      switch (peer.iceConnectionState) {
+        case "connected":
+        case "completed":
+          updateStatus("Call connected successfully", 'connected');
+          break;
+        case "disconnected":
+          updateStatus("Call disconnected", 'disconnected');
+          break;
+        case "failed":
+          addDebugLog("ICE connection failed, attempting restart...");
+          peer.restartIce();
+          break;
+        case "connecting":
+          updateStatus("Establishing connection...", 'connecting');
+          break;
       }
     };
     
+    peer.onconnectionstatechange = () => {
+      addDebugLog(`Peer connection state: ${peer.connectionState}`);
+    };
 
+    // WebSocket message handling
+    async function handleWebSocketMessage(event) {
+      try {
+        const data = JSON.parse(event.data);
+        addDebugLog(`Received: ${data.type}`);
+
+        switch (data.type) {
+          case "join_ack":
+            isCaller = data.initiator;
+            addDebugLog(`Join acknowledged - Role: ${isCaller ? "Caller" : "Receiver"}`);
+            
+            if (isCaller) {
+              addDebugLog("Creating offer as caller...");
+              const offer = await peer.createOffer({
+                offerToReceiveAudio: true,
+                offerToReceiveVideo: true
+              });
+              await peer.setLocalDescription(offer);
+              
+              socket.send(JSON.stringify({ 
+                type: "offer", 
+                sdp: offer.sdp,
+                type_sdp: offer.type
+              }));
+              addDebugLog("Offer sent successfully");
+            }
+            break;
+
+          case "offer":
+            if (!isCaller) {
+              addDebugLog("Processing received offer...");
+              await peer.setRemoteDescription(new RTCSessionDescription({
+                type: "offer",
+                sdp: data.sdp
+              }));
+              
+              const answer = await peer.createAnswer();
+              await peer.setLocalDescription(answer);
+              
+              socket.send(JSON.stringify({ 
+                type: "answer", 
+                sdp: answer.sdp,
+                type_sdp: answer.type
+              }));
+              addDebugLog("Answer sent successfully");
+            }
+            break;
+
+          case "answer":
+            if (isCaller) {
+              addDebugLog("Processing received answer...");
+              await peer.setRemoteDescription(new RTCSessionDescription({
+                type: "answer",
+                sdp: data.sdp
+              }));
+              addDebugLog("Remote description set with answer");
+            }
+            break;
+
+          case "candidate":
+            addDebugLog(`Processing ICE candidate: ${data.candidate.type || 'unknown'}`);
+            await peer.addIceCandidate(new RTCIceCandidate(data.candidate));
+            addDebugLog("ICE candidate added successfully");
+            break;
+
+          default:
+            addDebugLog(`Unknown message type: ${data.type}`);
+        }
+      } catch (error) {
+        addDebugLog(`Error processing message: ${error.message}`);
+        console.error("WebSocket message error:", error);
+      }
+    }
+
+    // Media controls
+    function toggleVideo() {
+      if (localStream) {
+        const videoTrack = localStream.getVideoTracks()[0];
+        if (videoTrack) {
+          videoTrack.enabled = !videoTrack.enabled;
+          isVideoEnabled = videoTrack.enabled;
+          document.getElementById('toggleVideo').textContent = 
+            isVideoEnabled ? '📹 Video On' : '📹 Video Off';
+          addDebugLog(`Video ${isVideoEnabled ? 'enabled' : 'disabled'}`);
+        }
+      }
+    }
+
+    function toggleAudio() {
+      if (localStream) {
+        const audioTrack = localStream.getAudioTracks()[0];
+        if (audioTrack) {
+          audioTrack.enabled = !audioTrack.enabled;
+          isAudioEnabled = audioTrack.enabled;
+          document.getElementById('toggleAudio').textContent = 
+            isAudioEnabled ? '🎤 Audio On' : '🎤 Audio Off';
+          addDebugLog(`Audio ${isAudioEnabled ? 'enabled' : 'disabled'}`);
+        }
+      }
+    }
+
+    function hangUp() {
+      addDebugLog("Hanging up call...");
+      
+      if (peer) {
+        peer.close();
+      }
+      
+      if (localStream) {
+        localStream.getTracks().forEach(track => track.stop());
+      }
+      
+      if (socket) {
+        socket.close();
+      }
+      
+      document.getElementById('localVideo').srcObject = null;
+      document.getElementById('remoteVideo').srcObject = null;
+      
+      updateStatus("Call ended", 'disconnected');
+      
+      // Reload page to restart
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000);
+    }
+
+    // Initialize media and connection
+    async function initialize() {
+      try {
+        addDebugLog("Requesting media access...");
+        updateStatus("Requesting camera and microphone access...", 'connecting');
+        
+        localStream = await navigator.mediaDevices.getUserMedia({ 
+          video: { 
+            width: { ideal: 1280 }, 
+            height: { ideal: 720 } 
+          }, 
+          audio: true 
+        });
+        
+        document.getElementById("localVideo").srcObject = localStream;
+        addDebugLog(`Local stream obtained - Video: ${localStream.getVideoTracks().length}, Audio: ${localStream.getAudioTracks().length}`);
+        
+        // Connect to WebSocket after getting media
+        connectWebSocket();
+        
+      } catch (error) {
+        addDebugLog(`Error accessing media: ${error.message}`);
+        updateStatus("Failed to access camera/microphone", 'disconnected');
+        alert("Please allow camera and microphone access to use video calling.");
+      }
+    }
+
+    // Start when page loads
+    window.addEventListener('load', initialize);
+    
+    // Handle page unload
+    window.addEventListener('beforeunload', () => {
+      if (localStream) {
+        localStream.getTracks().forEach(track => track.stop());
+      }
+      if (socket) {
+        socket.close();
+      }
+    });
   </script>
-  
 </body>
 </html>
